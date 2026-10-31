@@ -659,6 +659,19 @@ html[data-theme="neon"] .seg button.sel{ color:var(--on-accent); }
 .ai-presets button:active{ transform:scale(.95); }
 .ai-fbstats{ margin-top:8px; font-size:11px; color:var(--dim2); line-height:1.6; }
 
+/* ===== 官方 App 协议日志 ===== */
+.dgl-trace-head{ display:flex; align-items:center; gap:8px; margin-top:10px; font-size:11px; color:var(--dim2); }
+.dgl-trace-head span{ flex:1; min-width:0; }
+.dgl-trace{
+  margin-top:6px; max-height:150px; overflow:auto; font-size:10.5px; line-height:1.6;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:rgba(0,0,0,.35); border:1px solid var(--line); border-radius:10px; padding:8px;
+  color:var(--dim); white-space:pre-wrap; word-break:break-all;
+}
+.dgl-trace .in{ color:#9fe8d8; }
+.dgl-trace .out{ color:#e8d59f; }
+.dgl-trace .ev{ color:#ffe99d; font-weight:700; }
+
 /* ===== 提示 / 页脚 ===== */
 #toasts{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:100; display:flex; flex-direction:column; gap:8px; width:min(92vw,420px); pointer-events:none; }
 .toast{
@@ -806,10 +819,17 @@ footer b{ color:var(--dim); }
       <input type="text" id="dglUrl" value="wss://trex.dungeon-lab.cn/v4" spellcheck="false"
              autocomplete="off" autocapitalize="off" placeholder="wss://中继地址">
       <button class="dbtn" id="dglDiagBtn" style="padding:10px 12px;font-size:12.5px"><svg class="ic"><use href="#i-search"/></svg> 诊断</button>
+      <button class="dbtn" id="dglRefreshBtn" style="padding:10px 12px;font-size:12.5px">刷新设备</button>
       <button class="dbtn" id="dglBtn" style="padding:10px 16px;font-size:14px;font-weight:700">连接</button>
     </div>
     <div class="dgl-diag" id="dglDiag"></div>
     <div id="dglStatus" class="remote-status"><span class="remote-dot"></span> 未连接</div>
+    <div class="dgl-trace-head">
+      <span>协议日志（App 实际发来的消息）</span>
+      <button class="dbtn" id="dglTraceBtn" style="padding:5px 9px;font-size:11px">显示</button>
+      <button class="dbtn" id="dglTraceCopy" style="padding:5px 9px;font-size:11px">复制</button>
+    </div>
+    <div class="dgl-trace" id="dglTrace" style="display:none"></div>
 
     <div class="remote-panel" id="dglPairPanel">
       <div class="pair-box">
@@ -5054,7 +5074,25 @@ const DGL = {
   target: { a: 0, b: 0 }, applied: { a: 0, b: 0 },
   engine: { pattern: 'wave', period: 3, bpm: 120, _rand: 0.5,
             _ai: { segStart: 0, segDur: 2, fromAmp: 0.4, toAmp: 0.4, fromFreq: 30, toFreq: 30, shape: 'wave', spike: 0, spikeDur: 0.3 } },
-  frames: [], tickTimer: null, strengthAt: 0, reqN: 0, t0: 0,
+  frames: [], tickTimer: null, strengthAt: 0, reqN: 0, t0: 0, devPoll: null,
+  trace: [], traceN: 0,
+
+  /* 记录协议往来，便于排查"连上但没设备" */
+  log(dir, label, extra) {
+    const ts = new Date().toTimeString().slice(0, 8);
+    this.trace.push({ ts, dir, label, extra: extra || '' });
+    if (this.trace.length > 60) this.trace.shift();
+    this.traceN++;
+  },
+  renderTrace() {
+    const box = $('dglTrace');
+    if (!box || box.style.display === 'none') return;
+    const esc = (s) => String(s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+    box.innerHTML = this.trace.slice(-40).map(t =>
+      `<div class="${t.dir}">${t.ts} ${t.dir === 'in' ? '←' : '→'} ${esc(t.label)}${t.extra ? ' · ' + esc(t.extra) : ''}</div>`
+    ).join('') || '<div>（暂无消息）</div>';
+    box.scrollTop = box.scrollHeight;
+  },
 
   // 规范化中继地址：允许省略协议 / 末尾斜杠
   normalizeUrl(raw) {
@@ -5149,10 +5187,12 @@ const DGL = {
   disconnect(silent) {
     this._manual = true;
     this.stopEngine();
+    this.stopDevicePoll();
     if (this.phase === 'paired') { try { this.rpc('device.op.clear'); } catch (e) {} }
     if (this.ws) { try { this.ws.close(); } catch (e) {} }
     this.ws = null; this.phase = 'idle'; this.appId = null; this.devices = []; this.sel = null;
     this.target = { a: 0, b: 0 }; this.applied = { a: 0, b: 0 }; this.frames = [];
+    this.resetCards();
     if (!silent) this.render();
   },
 
@@ -5160,6 +5200,7 @@ const DGL = {
     manual = manual === undefined ? this._manual : manual;
     this._manual = false;
     this.stopEngine();
+    this.stopDevicePoll();
     const wasPaired = this.phase === 'paired';
     this.phase = 'idle'; this.ws = null; this.appId = null; this.devices = []; this.sel = null;
     this.target = { a: 0, b: 0 }; this.applied = { a: 0, b: 0 }; this.frames = [];
@@ -5169,8 +5210,15 @@ const DGL = {
 
   onMsg(text) {
     let m;
-    try { m = JSON.parse(text); } catch (e) { return; }
+    try { m = JSON.parse(text); } catch (e) { this.log('in', 'raw', String(text).slice(0, 80)); return; }
     if (!m || !m.type) return;
+    if (m.type === 'message') {
+      const d = m.data || {};
+      this.log('in', 'message', (d.t || '') + (d.ev ? ' · ' + d.ev : '') + (d.m ? ' · ' + d.m : '') +
+        (Array.isArray(d.devices) ? ' · devices:' + d.devices.length : '') +
+        (Array.isArray(d.slots) ? ' · slots:' + d.slots.length : '') +
+        (d.type ? ' · type:' + d.type : ''));
+    } else this.log('in', m.type, m.clientId || '');
     switch (m.type) {
       case 'hello':
         this.targetId = m.clientId;
@@ -5183,12 +5231,15 @@ const DGL = {
         this.phase = 'paired';
         this.t0 = performance.now() / 1000;
         this.requestDevices();
+        this.rpc('slots.get');
+        this.startDevicePoll();
         this.startEngine();
         this.render();
-        toast('官方 App 已配对，设备已接入', 'ok');
+        toast('官方 App 已配对，正在读取设备…', 'ok');
         break;
       case 'client_disconnected':
         this.stopEngine();
+        this.stopDevicePoll();
         this.phase = 'waiting'; this.appId = null; this.devices = []; this.sel = null;
         this.target = { a: 0, b: 0 }; this.applied = { a: 0, b: 0 };
         this.render();
@@ -5207,29 +5258,43 @@ const DGL = {
   onAppMsg(data) {
     if (!data || typeof data !== 'object') return;
     if (data.t === 'resp') {
-      if (data.error) console.warn('DGL rpc error:', data.reqId, data.error);
+      // ★ 关键：很多实现把设备列表放在 RPC 响应里，而不是推事件
+      if (data.error) { console.warn('DGL rpc error:', data.reqId, data.error); return; }
+      const r = data.result || data.data || null;
+      if (r) {
+        if (Array.isArray(r.devices)) this.applyDevices(r.devices);
+        if (Array.isArray(r.slots)) this.applySlots(r.slots);
+        if (r.device && r.slotId) this.mergeDevice(r);
+      }
       return;
     }
     if (data.t !== 'ev') return;
     switch (data.ev) {
       case 'devices.snapshot':
-        this.devices = Array.isArray(data.devices) ? data.devices : [];
-        this.pickDevice();
-        this.render();
+        this.applyDevices(Array.isArray(data.devices) ? data.devices : []);
+        break;
+      case 'slots.snapshot':
+        this.applySlots(Array.isArray(data.slots) ? data.slots : []);
+        if (Array.isArray(data.devices)) this.applyDevices(data.devices);
         break;
       case 'devices.patch': {
         const removed = new Set(data.removed || []);
-        this.devices = this.devices.filter(d => !removed.has(d.slotId));
-        for (const d of (data.added || [])) this.devices.push(d);
+        if (removed.size) this.devices = this.devices.filter(d => !removed.has(d.slotId));
+        if (Array.isArray(data.added)) this.applyDevices(data.added);
+        if (Array.isArray(data.devices)) this.applyDevices(data.devices);
+        if (Array.isArray(data.updates)) this.applyDevices(data.updates);
+        if (data.slotId) this.mergeDevice(data);
         this.pickDevice();
         this.render();
         break;
       }
       case 'slots.patch':
-        for (const s of (data.slots || [])) {
-          const d = this.devices.find(x => x.slotId === s.slotId);
-          if (d) d.state = Object.assign({}, d.state, s.slotState || {}, s.props || {});
-        }
+        this.applySlots(Array.isArray(data.slots) ? data.slots : (data.slotId ? [data] : []));
+        break;
+      case 'device.patch':
+        this.mergeDevice(data.device || data);
+        this.pickDevice();
+        this.render();
         break;
       case 'custom.action':
         if (typeof data.action === 'number') toast('App 按键动作：' + data.action);
@@ -5237,13 +5302,91 @@ const DGL = {
     }
   },
 
+  /* 合并一台设备（按 slotId） */
+  mergeDevice(raw) {
+    if (!raw || !raw.slotId) return null;
+    const norm = {
+      slotId: raw.slotId,
+      type: raw.type || raw.deviceType || (raw.device && raw.device.type) || '',
+      name: raw.name || (raw.device && raw.device.name) || '',
+      state: Object.assign({}, (raw.state || raw.slotState || {}), raw.props || {}, (raw.device && raw.device.state) || {}),
+    };
+    let d = this.devices.find(x => x.slotId === norm.slotId);
+    if (d) {
+      d.type = norm.type || d.type;
+      d.name = norm.name || d.name;
+      d.state = Object.assign({}, d.state, norm.state);
+      d.state.hasDevice = !(d.state.hasDevice === false);
+    } else {
+      if (norm.state.hasDevice === false) return null;   // 空槽位不加入
+      this.devices.push(norm);
+      d = norm;
+    }
+    return d;
+  },
+
+  applyDevices(list) {
+    if (!Array.isArray(list) || !list.length) {
+      this.pickDevice(); this.render(); return;
+    }
+    list.forEach(d => this.mergeDevice(d));
+    this.pickDevice();
+    this.render();
+    if (this.devices.length) this.stopDevicePoll(true);
+  },
+
+  applySlots(list) {
+    if (!Array.isArray(list)) return;
+    list.forEach(s => {
+      if (!s) return;
+      if (!s.slotId) return;
+      const d = this.devices.find(x => x.slotId === s.slotId);
+      const st = Object.assign({}, s.slotState || {}, s.props || {}, (s.device && s.device.state) || {});
+      if (d) d.state = Object.assign({}, d.state, st);
+      else if ((s.device || s.hasDevice) && (s.slotState ? s.slotState.hasDevice !== false : true)) {
+        this.mergeDevice({ slotId: s.slotId, type: (s.device && s.device.type) || s.type, name: (s.device && s.device.name) || s.name, state: st });
+      }
+    });
+    this.pickDevice();
+    this.render();
+    if (this.devices.length) this.stopDevicePoll(true);
+  },
+
+  /* 配对了但没设备时，持续问 App 要设备列表 */
+  startDevicePoll() {
+    this.stopDevicePoll();
+    let tries = 0;
+    this.devPoll = setInterval(() => {
+      if (this.phase !== 'paired') { this.stopDevicePoll(); return; }
+      if (this.devices.length) { this.stopDevicePoll(); return; }
+      tries++;
+      this.requestDevices();
+      this.rpc('slots.get');
+      if (tries === 4) toast('已配对，但 App 还没上报设备：确认官方 App 里已连上实体设备', 'warn', 6000);
+      if (tries >= 12) this.stopDevicePoll();
+    }, 1500);
+  },
+  stopDevicePoll(silent) {
+    if (this.devPoll) { clearInterval(this.devPoll); this.devPoll = null; }
+    if (silent) this.render();
+  },
+
   pickDevice() {
-    if (this.sel && this.devices.some(d => d.slotId === this.sel.slotId)) return;
-    this.sel = this.devices[0] || null;
+    const alive = this.devices.filter(d => !d.state || d.state.hasDevice !== false);
+    if (this.sel && alive.some(d => d.slotId === this.sel.slotId)) return;
+    this.sel = alive[0] || null;
     if (this.sel) { this.target = { a: 0, b: 0 }; this.applied = { a: 0, b: 0 }; }
   },
 
-  sendRaw(obj) { if (this.ws && this.ws.readyState === 1) { try { this.ws.send(JSON.stringify(obj)); } catch (e) {} } },
+  sendRaw(obj) {
+    if (this.ws && this.ws.readyState === 1) {
+      try {
+        this.ws.send(JSON.stringify(obj));
+        const d = obj.data || {};
+        this.log('out', obj.type, d.t ? (d.t + (d.m ? ' · ' + d.m : '') + (d.ev ? ' · ' + d.ev : '')) : '');
+      } catch (e) {}
+    }
+  },
   sendApp(data) { if (this.appId) this.sendRaw({ type: 'message', clientId: this.appId, data }); },
   rpc(method, data) {
     const reqId = 'q' + (++this.reqN) + '-' + Date.now().toString(36);
@@ -5262,8 +5405,12 @@ const DGL = {
 
   // 官方 App 模式下的设备类型 → 使用对应设备的通道上限
   devKind() {
-    const t = (this.sel && (this.sel.type || '')) || '';
-    return /COYOTE|郊狼/i.test(t) ? 'coyote' : 'possum';
+    const t = String((this.sel && (this.sel.type || this.sel.name)) || '');
+    const st = (this.sel && this.sel.state) || {};
+    if (/POSSUM|负鼠|VIBRAT/i.test(t)) return 'possum';
+    if (/COYOTE|郊狼/i.test(t)) return 'coyote';
+    if (st.hasLed || st.led != null || st.vibrate != null) return 'possum';
+    return 'coyote';   // 未知类型按郊狼处理（更常见）
   },
 
   setTarget(ch, v) {
@@ -5343,24 +5490,80 @@ const DGL = {
     return 'https://dungeon-lab.cn/s/?v=1&action=socket&url=' + encodeURIComponent(appUrl);
   },
 
+  /* 把官方 App 的连接状态同步到顶部徽章与设备卡片（避免显示"未连接"） */
+  syncCards() {
+    if (this.phase !== 'paired' || !this.sel) return;
+    const kind = this.devKind();
+    const d = DEVICES[kind];
+    if (d && d.cardEl && !d.connected) {
+      const conn = d.cardEl.querySelector('[data-sec="connect"]');
+      if (conn) conn.style.display = 'none';
+      const head = d.cardEl.querySelector('[data-sec="head"]');
+      if (head) {
+        head.style.display = 'flex';
+        const st = head.querySelector('[data-b="state"]');
+        if (st) st.textContent = '官方 App 接管';
+        const dc = head.querySelector('[data-act="disconnect"]');
+        if (dc) dc.style.display = 'none';
+        const bat = this.sel.state && this.sel.state.battery;
+        if (bat != null) {
+          const b = head.querySelector('[data-b="batt"]');
+          if (b) b.textContent = bat + '%';
+        }
+      }
+    }
+    const chip = $(kind === 'coyote' ? 'chipCoyote' : 'chipPossum');
+    if (chip && (!d || !d.connected)) {
+      chip.classList.add('on');
+      const bat = this.sel.state && this.sel.state.battery;
+      if (bat != null) {
+        const cb = $(kind === 'coyote' ? 'chipBatC' : 'chipBatP');
+        if (cb) cb.textContent = ' ' + bat + '%';
+      }
+    }
+  },
+
+  resetCards() {
+    Object.values(DEVICES).forEach(d => {
+      if (!d || !d.cardEl || d.connected) return;
+      const conn = d.cardEl.querySelector('[data-sec="connect"]');
+      if (conn) conn.style.display = '';
+      const head = d.cardEl.querySelector('[data-sec="head"]');
+      if (head) head.style.display = 'none';
+      const st = head && head.querySelector('[data-b="state"]');
+      if (st) st.textContent = '已连接';
+      const dc = head && head.querySelector('[data-act="disconnect"]');
+      if (dc) dc.style.display = '';
+    });
+    if (!DEVICES.coyote || !DEVICES.coyote.connected) { const c = $('chipCoyote'); if (c) c.classList.remove('on'); }
+    if (!DEVICES.possum || !DEVICES.possum.connected) { const c = $('chipPossum'); if (c) c.classList.remove('on'); }
+  },
+
   render() {
     const st = $('dglStatus');
     if (!st) return;
+    this.renderTrace();
     const dot = this.phase === 'idle' ? '' : ' on';
     const txt = this.phase === 'idle' ? '未连接' :
       this.phase === 'connecting' ? '连接中…' :
-      this.phase === 'waiting' ? '已连中继 · 等待官方 App 配对' : '已配对 · ' + (this.sel ? (this.sel.name || this.sel.type || this.sel.slotId) : '无设备');
+      this.phase === 'waiting' ? '已连中继 · 等待官方 App 配对' :
+      this.sel ? ('已配对 · ' + (this.sel.name || this.sel.type || this.sel.slotId)) :
+      (this.devices.length ? '已配对 · 请选择设备' : '已配对 · 等待 App 上报设备…');
     st.innerHTML = '<span class="remote-dot' + dot + '"></span> ' + txt;
+    if (this.phase === 'paired') this.syncCards(); else this.resetCards();
+    const needPair = this.phase === 'waiting' || (this.phase === 'paired' && !this.devices.length);
     const pair = $('dglPairPanel');
-    if (pair) pair.classList.toggle('open', this.phase === 'waiting' || this.phase === 'paired');
+    if (pair) pair.classList.toggle('open', needPair);
+    const qr = $('dglQr');
+    if (qr && !needPair) qr.style.display = 'none';
     const ctl = document.querySelector('#dglCard [data-sec="dglCtl"]');
     if (ctl) ctl.style.display = this.phase === 'paired' ? 'block' : 'none';
-    if (this.phase === 'waiting' && $('dglQr')) {
+    if (needPair && qr) {
       try {
-        $('dglQr').style.display = 'block';
-        if ($('dglQr').width === 0 || !$('dglQr').dataset.done) {
-          QRCode.canvas($('dglQr'), this.pairUrl());
-          $('dglQr').dataset.done = '1';
+        qr.style.display = 'block';
+        if (qr.width === 0 || !qr.dataset.done) {
+          QRCode.canvas(qr, this.pairUrl());
+          qr.dataset.done = '1';
         }
       } catch (e) { console.warn(e); }
       const a = $('dglPairLink');
@@ -5372,7 +5575,7 @@ const DGL = {
     if (chips && this.phase === 'paired') {
       chips.innerHTML = this.devices.length
         ? this.devices.map(d => `<button data-slot="${d.slotId}" class="${this.sel && this.sel.slotId === d.slotId ? 'sel' : ''}">${(d.name || d.type || d.slotId)}</button>`).join('')
-        : '<span class="preset-empty">App 未上报设备…</span>';
+        : '<span class="preset-empty">App 未上报设备…（若 App 里已连设备，点「刷新设备」）</span>';
       chips.querySelectorAll('[data-slot]').forEach(b => b.onclick = () => {
         const d = this.devices.find(x => x.slotId === b.dataset.slot);
         if (d) { this.sel = d; this.target = { a: 0, b: 0 }; this.applied = { a: 0, b: 0 }; this.frames = []; this.render(); }
@@ -5726,6 +5929,28 @@ window.addEventListener('DOMContentLoaded', () => {
     DGL.connect();
   });
   $('dglDiagBtn').addEventListener('click', () => DGL.diagnose());
+  $('dglRefreshBtn').addEventListener('click', () => {
+    if (DGL.phase !== 'paired') { toast('先连上官方 App 再刷新设备', 'warn'); return; }
+    DGL.requestDevices();
+    DGL.rpc('slots.get');
+    DGL.startDevicePoll();
+    toast('已请求设备列表…', 'ok');
+  });
+  $('dglTraceBtn').addEventListener('click', () => {
+    const box = $('dglTrace');
+    if (!box) return;
+    const open = box.style.display === 'none';
+    box.style.display = open ? 'block' : 'none';
+    $('dglTraceBtn').textContent = open ? '隐藏' : '显示';
+    if (open) DGL.renderTrace();
+  });
+  $('dglTraceCopy').addEventListener('click', () => {
+    const txt = DGL.trace.map(t => `${t.ts} ${t.dir === 'in' ? '<-' : '->'} ${t.label} ${t.extra}`).join('\n');
+    if (!txt) { toast('还没有日志，先连接一次', 'warn'); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(() => toast('协议日志已复制', 'ok')).catch(() => toast('复制失败，可手动长按选择', 'warn'));
+    } else toast('此浏览器不支持自动复制，请展开后长按选择', 'warn');
+  });
   // 静态托管时提示远程控制需要外接中继
   (() => {
     const host = location.hostname || '';
