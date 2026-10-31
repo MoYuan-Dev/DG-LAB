@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -488,6 +488,24 @@ canvas{ display:block; width:100%; height:64px; }
 .simon-btn.on{ opacity:1; box-shadow:0 0 26px currentColor; transform:scale(1.04); }
 .simon-btn:active{ transform:scale(.94); opacity:1; }
 
+/* ===== 飞镖 / 停表 / 心算 ===== */
+.dart-target{ position:relative; height:44px; border-radius:12px; margin:14px 0 6px; border:1px solid var(--line);
+  background:linear-gradient(90deg, rgba(255,77,94,.18), rgba(255,194,75,.22) 50%, rgba(255,77,94,.18)); }
+.dart-zone{ position:absolute; left:45%; top:0; width:10%; height:100%; background:rgba(255,194,75,.30); border-radius:6px; }
+.dart-needle{ position:absolute; top:-4px; width:4px; height:52px; background:#fff; border-radius:2px; box-shadow:0 0 10px #fff; left:0; }
+.stopwatch-time{ text-align:center; font-size:22px; font-weight:900; color:var(--amber); margin:14px 0 6px; font-variant-numeric:tabular-nums; }
+.math-q{ text-align:center; font-size:30px; font-weight:900; letter-spacing:2px; margin:16px 0 6px; }
+
+
+/* ===== 线性图标 ===== */
+.ic{ width:1.05em; height:1.05em; fill:none; stroke:currentColor; stroke-width:1.8;
+  stroke-linecap:round; stroke-linejoin:round; vertical-align:-0.16em; flex:none; }
+.ic.solid{ fill:currentColor; stroke:none; }
+.tab .t-ic{ display:flex; align-items:center; justify-content:center; }
+.tab .t-ic .ic{ width:19px; height:19px; }
+h2 .ic{ width:1.1em; height:1.1em; }
+.btn-ic{ display:inline-flex; align-items:center; gap:6px; justify-content:center; }
+
 /* ===== 提示 / 页脚 ===== */
 #toasts{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:100; display:flex; flex-direction:column; gap:8px; width:min(92vw,420px); pointer-events:none; }
 .toast{
@@ -513,59 +531,79 @@ footer b{ color:var(--dim); }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true"><defs>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 5 13h5l-1 9 8-11h-5l1-9Z"/></symbol>
+<symbol id="i-games" viewBox="0 0 24 24"><path d="M7.5 8h9a4.5 4.5 0 0 1 0 9h-9a4.5 4.5 0 0 1 0-9Z"/><path d="M9 10.5v3M7.5 12h3M15.5 11h.01M17.5 13.5h.01"/></symbol>
+<symbol id="i-ai" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
+<symbol id="i-scene" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 9.5h18M8 5v4.5M16 5v4.5"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2"/><path d="M4 12h16M12 3.8c3.1 3.6 3.1 12.8 0 16.4M12 3.8c-3.1 3.6-3.1 12.8 0 16.4"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v6c0 4.6 3 7.7 7 9 4-1.3 7-4.4 7-9V6l-7-3Z"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.2"/><path d="m15.6 15.6 4 4"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10.5 13.5a4 4 0 0 0 5.7 0l2.3-2.3a4 4 0 0 0-5.7-5.7L11.5 6.8"/><path d="M13.5 10.5a4 4 0 0 0-5.7 0L5.5 12.8a4 4 0 0 0 5.7 5.7l1.3-1.3"/></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="3.5"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5 18.5 12 8 18.5v-13Z"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M9.5 5v14M14.5 5v14"/></symbol>
+<symbol id="i-battery" viewBox="0 0 24 24"><rect x="2.5" y="8" width="17" height="8" rx="2"/><path d="M21.5 10.5v3"/><path d="M6.5 10.5v3M9.5 10.5v3"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M8.5 16v-4.5M12.5 16V8M16.5 16v-6.5"/></symbol>
+<symbol id="i-save" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5V4Z"/><path d="M8.5 4v5h6.5V4M8 20v-6h8v6"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="3.6"/></symbol>
+<symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.6 2M9.5 3h5"/></symbol>
+<symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8 7.5h8M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01M8.5 15h.01M12 15h.01M15.5 15h.01"/></symbol>
+<symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3.5"/></symbol>
+<symbol id="i-brain" viewBox="0 0 24 24"><path d="M9.5 4.5a2.8 2.8 0 0 0-2.8 2.8 2.8 2.8 0 0 0-.9 5.1A2.8 2.8 0 0 0 9 18.5a2.8 2.8 0 0 0 5.9 0 2.8 2.8 0 0 0 3.2-6.1 2.8 2.8 0 0 0-.9-5.1A2.8 2.8 0 0 0 14.5 4.5a2.8 2.8 0 0 0-5 0Z"/></symbol>
+<symbol id="i-wave" viewBox="0 0 24 24"><path d="M3 14.5c2-4.5 4-4.5 6 0s4 4.5 6 0 4-4.5 6 0"/></symbol>
+<symbol id="i-metronome" viewBox="0 0 24 24"><path d="M10 3.5h4L18 20.5H6L10 3.5Z"/><path d="M12 9.5v.01M12 13.5v.01M12 17.5v.01"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3.5s5 5 5 9a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5.4 1.4 1.3 1.9 1.8 1.9 0-2.9.7-5 1.2-6.4Z"/></symbol>
+<symbol id="i-leaf" viewBox="0 0 24 24"><path d="M20 4.5C10.5 4.5 4.5 9 4.5 16c0 1.8.8 3.5.8 3.5S8 11.5 16 8.5c0 0-5 5.3-6 11"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"/></symbol>
+<symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"/></symbol>
+<symbol id="i-cards" viewBox="0 0 24 24"><rect x="3.5" y="6" width="10" height="14" rx="2"/><path d="M8.5 2.5h9A1.5 1.5 0 0 1 19 4v12.5"/></symbol>
+<symbol id="i-bomb" viewBox="0 0 24 24"><circle cx="10.5" cy="14.5" r="5.8"/><path d="M14.6 9.4 17 7M18.5 5.5 20 4M16.5 9.5l.01.01"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.8"/><rect x="4" y="13" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/></symbol>
+<symbol id="i-rope" viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M7 8.5v7M17 8.5v7"/><path d="M12 8.5v7"/></symbol>
+<symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 12.5V6.8a1.6 1.6 0 0 1 3.2 0V12m0-1.6a1.6 1.6 0 0 1 3.2 0V12m0-1a1.6 1.6 0 0 1 3.2 0v4.2a5 5 0 0 1-5 5h-.8a5 5 0 0 1-5-5v-2.4"/></symbol>
+<symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8.5V5h3.5M20 8.5V5h-3.5M4 15.5V19h3.5M20 15.5V19h-3.5"/><path d="M8.5 12h7"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 6v-1a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h1"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+<symbol id="i-paw" viewBox="0 0 24 24"><circle cx="7.5" cy="9" r="2"/><circle cx="12" cy="7" r="2"/><circle cx="16.5" cy="9" r="2"/><path d="M12 12.5c-3 0-5 2-5 4.2 0 1.4 1 2.3 2.4 2.3h5.2c1.4 0 2.4-.9 2.4-2.3 0-2.2-2-4.2-5-4.2Z"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6 18 18M18 6l-1.4 1.4M7.4 16.6 6 18"/></symbol>
+<symbol id="i-spiral" viewBox="0 0 24 24"><path d="M12 12a2 2 0 1 0 2-2 4 4 0 1 0-4 4 6 6 0 1 0 6-6 8 8 0 1 0-8 8"/></symbol>
+</defs></svg>
 
 <header id="topbar">
   <div class="brand">
-    <div class="logo">⚡</div>
+    <div class="logo"><svg class="ic"><use href="#i-bolt"/></svg></div>
     <div><h1>DG-LAB 控制台</h1><small>郊狼 3.0 · 负鼠 · 局域网直连</small></div>
   </div>
   <div class="top-status">
-    <span class="chip" id="chipCoyote">🐺 郊狼<i class="dot"></i><i class="bat" id="chipBatC"></i></span>
-    <span class="chip" id="chipPossum">🎮 负鼠<i class="dot"></i><i class="bat" id="chipBatP"></i></span>
+    <span class="chip" id="chipCoyote">郊狼<i class="dot"></i><i class="bat" id="chipBatC"></i></span>
+    <span class="chip" id="chipPossum">负鼠<i class="dot"></i><i class="bat" id="chipBatP"></i></span>
   </div>
-  <button class="stop-btn" id="btnStop">🛑 急停</button>
+  <button class="stop-btn" id="btnStop"><svg class="ic"><use href="#i-stop"/></svg><span>急停</span></button>
 </header>
 
 <div class="banner" id="banner"></div>
 
 <nav id="tabbar">
-  <button class="tab active" data-tab="devices"><span class="t-ic">⚡</span>设备</button>
-  <button class="tab" data-tab="games"><span class="t-ic">🎮</span>游戏</button>
-  <button class="tab" data-tab="ai"><span class="t-ic">🤖</span>AI</button>
-  <button class="tab" data-tab="scenes"><span class="t-ic">🎬</span>场景</button>
-  <button class="tab" data-tab="remote"><span class="t-ic">🌐</span>远程</button>
-  <button class="tab" data-tab="more"><span class="t-ic">⋯</span>更多</button>
+  <button class="tab active" data-tab="devices"><span class="t-ic"><svg class="ic"><use href="#i-bolt"/></svg></span>设备</button>
+  <button class="tab" data-tab="games"><span class="t-ic"><svg class="ic"><use href="#i-games"/></svg></span>游戏</button>
+  <button class="tab" data-tab="ai"><span class="t-ic"><svg class="ic"><use href="#i-ai"/></svg></span>AI</button>
+  <button class="tab" data-tab="scenes"><span class="t-ic"><svg class="ic"><use href="#i-scene"/></svg></span>场景</button>
+  <button class="tab" data-tab="remote"><span class="t-ic"><svg class="ic"><use href="#i-globe"/></svg></span>远程</button>
+  <button class="tab" data-tab="more"><span class="t-ic"><svg class="ic"><use href="#i-more"/></svg></span>更多</button>
 </nav>
 
 <main>
 <div class="tab-panel" data-panel="devices">
   <section class="card" id="safetyCard">
-    <h2>🛡️ 安全中心<span class="sub">输出安全由多重限制保障</span></h2>
+    <h2><svg class="ic"><use href="#i-shield"/></svg> 安全中心<span class="sub">输出安全由多重限制保障</span></h2>
     <div class="safety-grid">
       <div class="safe-item" style="grid-column:1/-1">
-        <div class="slider-label"><span>每通道独立强度上限（同时写入郊狼硬件限制）</span><b id="capSum">100 / 100 / 100 / 100</b></div>
-        <div class="cap-grid">
-          <div class="cap-row">
-            <span class="cap-name"><i class="cap-dot a"></i>郊狼 A</span>
-            <input type="range" id="capCA" min="0" max="200" step="5" value="100">
-            <b id="capCAv">100</b>
-          </div>
-          <div class="cap-row">
-            <span class="cap-name"><i class="cap-dot b"></i>郊狼 B</span>
-            <input type="range" id="capCB" min="0" max="200" step="5" value="100">
-            <b id="capCBv">100</b>
-          </div>
-          <div class="cap-row">
-            <span class="cap-name"><i class="cap-dot a"></i>负鼠 A</span>
-            <input type="range" id="capPA" min="0" max="200" step="5" value="100">
-            <b id="capPAv">100</b>
-          </div>
-          <div class="cap-row">
-            <span class="cap-name"><i class="cap-dot b"></i>负鼠 B</span>
-            <input type="range" id="capPB" min="0" max="200" step="5" value="100">
-            <b id="capPBv">100</b>
-          </div>
-        </div>
+        <div class="slider-label"><span>全局安全上限（所有输出都不超过它，郊狼还会写入硬件限制）</span><b id="capVal">100</b></div>
+        <input type="range" id="capSlider" min="10" max="200" step="5" value="100">
       </div>
       <div class="safe-item">
         <div class="slider-label"><span>缓升时间（升高强度的软启动）</span><b id="rampVal">1.2 秒</b></div>
@@ -580,7 +618,7 @@ footer b{ color:var(--dim); }
         </div>
       </div>
       <div class="safe-item" style="grid-column:1/-1">
-        <div class="slider-label"><span>上限 = 该通道的硬件输出上限；急停 / 断连会立即归零</span></div>
+        <div class="slider-label"><span>上限即硬件输出上限；急停 / 断连会立即归零</span></div>
         <div class="row" style="margin-top:8px; gap:8px;">
           <button class="dbtn" id="allZeroBtn">全部归零</button>
           <button class="dbtn warn" id="allDisconnectBtn">断开全部设备</button>
@@ -588,16 +626,16 @@ footer b{ color:var(--dim); }
       </div>
     </div>
     <div class="stop-restore" id="restoreWrap">
-      <button id="restoreBtn">↩️ 恢复急停前的强度（将缓升）</button>
+      <button id="restoreBtn">恢复急停前的强度（将缓升）</button>
     </div>
   </section>
 
   <section class="card" id="dglCard">
-    <h2>📲 官方 App 连接（WebSocket）<span class="sub">官方 4.0 App 连设备，网页经中继控制</span></h2>
+    <h2><svg class="ic"><use href="#i-phone"/></svg> 官方 App 连接（WebSocket）<span class="sub">官方 4.0 App 连设备，网页经中继控制</span></h2>
     <div class="remote-line">
       <input type="text" id="dglUrl" value="wss://trex.dungeon-lab.cn/v4" spellcheck="false"
              autocomplete="off" autocapitalize="off" placeholder="wss://中继地址">
-      <button class="dbtn" id="dglDiagBtn" style="padding:10px 12px;font-size:12.5px">🔍 诊断</button>
+      <button class="dbtn" id="dglDiagBtn" style="padding:10px 12px;font-size:12.5px"><svg class="ic"><use href="#i-search"/></svg> 诊断</button>
       <button class="dbtn" id="dglBtn" style="padding:10px 16px;font-size:14px;font-weight:700">连接</button>
     </div>
     <div class="dgl-diag" id="dglDiag"></div>
@@ -609,8 +647,8 @@ footer b{ color:var(--dim); }
         <div class="pair-info">
           <b>① 手机打开 DG-LAB 4 官方 App</b>
           <b>② 用 App 扫描左侧二维码完成配对</b>
-          <a id="dglPairLink" class="dbtn primary" href="#">📲 同一台手机上，点这里直接配对</a>
-          <button class="dbtn" id="dglCopy">复制配对链接</button>
+          <a id="dglPairLink" class="dbtn primary" href="#"><svg class="ic"><use href="#i-phone"/></svg> 同一台手机上，点这里直接配对</a>
+          <button class="dbtn" id="dglCopy"><svg class="ic"><use href="#i-copy"/></svg> 复制配对链接</button>
           <small id="dglTid"></small>
           <small>配对成功后 App 会列出设备；在下方选择设备即可控制。App 负责蓝牙连设备，本页面只经中继下发指令。</small>
         </div>
@@ -641,13 +679,13 @@ footer b{ color:var(--dim); }
           <button class="pat" data-dpat="wave"><span class="ic">∿</span>波浪</button>
           <button class="pat" data-dpat="breath"><span class="ic">◠</span>呼吸</button>
           <button class="pat" data-dpat="stairs"><span class="ic">▥</span>阶梯</button>
-          <button class="pat" data-dpat="random"><span class="ic">⚄</span>随机</button>
+          <button class="pat" data-dpat="random"><span class="ic"><svg class="ic"><use href="#i-dice"/></svg></span>随机</button>
           <button class="pat" data-dpat="tap"><span class="ic">·</span>轻敲</button>
-          <button class="pat" data-dpat="bpm"><span class="ic">🥁</span>节拍</button>
-          <button class="pat" data-dpat="ai"><span class="ic">🧠</span>智能随机</button>
+          <button class="pat" data-dpat="bpm"><span class="ic"><svg class="ic"><use href="#i-metronome"/></svg></span>节拍</button>
+          <button class="pat" data-dpat="ai"><span class="ic"><svg class="ic"><use href="#i-brain"/></svg></span>智能随机</button>
         </div>
         <div class="row" style="margin-top:12px">
-          <button class="dbtn warn" id="dglStop" style="flex:1;padding:11px">⏹ 停止输出（归零）</button>
+          <button class="dbtn warn" id="dglStop" style="flex:1;padding:11px"><svg class="ic"><use href="#i-stop"/></svg> 停止输出（归零）</button>
         </div>
       </div>
     </div>
@@ -661,11 +699,11 @@ footer b{ color:var(--dim); }
 
 <div class="tab-panel" data-panel="remote">
   <section class="card" id="remoteCard">
-    <h2>🌐 远程控制<span class="sub">两台手机同一房间码：一端受控、一端控制</span></h2>
+    <h2><svg class="ic"><use href="#i-globe"/></svg> 远程控制<span class="sub">两台手机同一房间码：一端受控、一端控制</span></h2>
     <div class="remote-line">
       <select id="remoteRole">
-        <option value="wearer">🙋 受控端（穿戴设备的一方）</option>
-        <option value="ctrl">🎛️ 控制端（远程操控的一方）</option>
+        <option value="wearer">受控端（穿戴设备的一方）</option>
+        <option value="ctrl">控制端（远程操控的一方）</option>
       </select>
       <input type="text" id="remoteCode" class="code" maxlength="8" placeholder="房间码"
              autocomplete="off" autocapitalize="characters" spellcheck="false">
@@ -685,7 +723,7 @@ footer b{ color:var(--dim); }
         ① 点右上角「急停」立即归零；② 点下方按钮夺回控制（断开远程）。
       </div>
       <div style="margin-top:12px;display:flex;gap:8px">
-        <button class="dbtn warn" id="remoteTakeBack" style="flex:1;padding:11px">✋ 夺回控制 / 停止共享</button>
+        <button class="dbtn warn" id="remoteTakeBack" style="flex:1;padding:11px">夺回控制 / 停止共享</button>
       </div>
     </div>
 
@@ -722,20 +760,20 @@ footer b{ color:var(--dim); }
         <button class="pat" data-rpat="wave"><span class="ic">∿</span>波浪</button>
         <button class="pat" data-rpat="breath"><span class="ic">◠</span>呼吸</button>
         <button class="pat" data-rpat="stairs"><span class="ic">▥</span>阶梯</button>
-        <button class="pat" data-rpat="random"><span class="ic">⚄</span>随机</button>
+        <button class="pat" data-rpat="random"><span class="ic"><svg class="ic"><use href="#i-dice"/></svg></span>随机</button>
         <button class="pat" data-rpat="tap"><span class="ic">·</span>轻敲</button>
-        <button class="pat" data-rpat="bpm"><span class="ic">🥁</span>节拍</button>
-        <button class="pat" data-rpat="ai"><span class="ic">🧠</span>智能随机</button>
-        <button class="pat" data-rpat="mic"><span class="ic">🎤</span>麦克风</button>
+        <button class="pat" data-rpat="bpm"><span class="ic"><svg class="ic"><use href="#i-metronome"/></svg></span>节拍</button>
+        <button class="pat" data-rpat="ai"><span class="ic"><svg class="ic"><use href="#i-brain"/></svg></span>智能随机</button>
+        <button class="pat" data-rpat="mic"><span class="ic"><svg class="ic"><use href="#i-mic"/></svg></span>麦克风</button>
       </div>
-      <button class="remote-stop" id="remoteStopBtn">🛑 远程急停</button>
+      <button class="remote-stop" id="remoteStopBtn"><svg class="ic"><use href="#i-stop"/></svg> 远程急停</button>
     </div>
   </section>
 </div>
 
 <div class="tab-panel" data-panel="ai">
   <section class="card" id="aiCard">
-    <h2>🤖 AI 智控<span class="sub">自动升温 / 挑逗 / 冲击，按你的感受调节</span></h2>
+    <h2><svg class="ic"><use href="#i-ai"/></svg> AI 智控<span class="sub">自动升温 / 挑逗 / 冲击，按你的感受调节</span></h2>
     <div class="ai-range">
       <div class="safe-item">
         <div class="slider-label"><span>目标区间 · 下限</span><b id="aiLoV">30</b></div>
@@ -753,20 +791,28 @@ footer b{ color:var(--dim); }
       <button data-at="possumB">负鼠 B</button>
     </div>
     <div class="ai-styles" id="aiStyles">
-      <button data-style="soft" class="sel">🌙 温柔</button>
-      <button data-style="balanced">⚖️ 均衡</button>
-      <button data-style="intense">🔥 激烈</button>
+      <button data-style="soft" class="sel"><svg class="ic"><use href="#i-moon"/></svg> 温柔</button>
+      <button data-style="balanced">均衡</button>
+      <button data-style="intense"><svg class="ic"><use href="#i-flame"/></svg> 激烈</button>
     </div>
     <div class="ai-status" id="aiStatus">未启动 —— 先连接设备，再点「启动 AI」</div>
+    <div class="wave-box" style="margin-top:10px">
+      <div class="wave-legend">
+        <span><i style="background:#27d3e6"></i>A 输出</span>
+        <span><i style="background:#f26bb5"></i>B 输出</span>
+        <span style="margin-left:auto"><i style="background:#ffc24b"></i>目标线</span>
+      </div>
+      <canvas id="aiWave" style="height:88px"></canvas>
+    </div>
     <div class="ai-feedback" id="aiFeedback">
-      <button data-fb="low">😌 太轻</button>
-      <button data-fb="ok">👌 正好</button>
-      <button data-fb="high">🥵 太重</button>
+      <button data-fb="low">太轻</button>
+      <button data-fb="ok">正好</button>
+      <button data-fb="high">太重</button>
     </div>
     <div class="script-btns">
-      <button class="play" id="aiStart">▶ 启动 AI</button>
-      <button id="aiPause">⏸ 暂停</button>
-      <button class="stopb" id="aiStop">⏹ 停止</button>
+      <button class="play" id="aiStart"><svg class="ic"><use href="#i-play"/></svg> 启动 AI</button>
+      <button id="aiPause"><svg class="ic"><use href="#i-pause"/></svg> 暂停</button>
+      <button class="stopb" id="aiStop"><svg class="ic"><use href="#i-stop"/></svg> 停止</button>
     </div>
     <div class="game-log" id="aiLog" style="margin-top:10px"></div>
   </section>
@@ -774,18 +820,18 @@ footer b{ color:var(--dim); }
 
 <div class="tab-panel" data-panel="scenes">
   <section class="card" id="scenesCard">
-    <h2>🎬 快捷场景<span class="sub">一键套用整套强度与波形</span></h2>
+    <h2><svg class="ic"><use href="#i-scene"/></svg> 快捷场景<span class="sub">一键套用整套强度与波形</span></h2>
     <div class="scenes-grid" id="scenesGrid">
-      <button data-scene="soft"><span class="sc-ic">🌙</span>温柔<small>波浪 · 低强度</small></button>
-      <button data-scene="relax"><span class="sc-ic">🍃</span>舒缓<small>呼吸 · 中低</small></button>
-      <button data-scene="spicy"><span class="sc-ic">🔥</span>刺激<small>脉冲 · 中高</small></button>
-      <button data-scene="wild"><span class="sc-ic">⚡</span>强劲<small>智能随机 · 高</small></button>
+      <button data-scene="soft"><span class="sc-ic"><svg class="ic"><use href="#i-moon"/></svg></span>温柔<small>波浪 · 低强度</small></button>
+      <button data-scene="relax"><span class="sc-ic"><svg class="ic"><use href="#i-leaf"/></svg></span>舒缓<small>呼吸 · 中低</small></button>
+      <button data-scene="spicy"><span class="sc-ic"><svg class="ic"><use href="#i-flame"/></svg></span>刺激<small>脉冲 · 中高</small></button>
+      <button data-scene="wild"><span class="sc-ic"><svg class="ic"><use href="#i-bolt"/></svg></span>强劲<small>智能随机 · 高</small></button>
     </div>
     <div class="scene-note">场景强度自动钳制在全局上限内；请确认自身耐受后使用。</div>
   </section>
 
   <section class="card" id="scriptCard">
-    <h2>🎞 时间轴脚本<span class="sub">手绘强度曲线，自动播放</span></h2>
+    <h2><svg class="ic"><use href="#i-scene"/></svg> 时间轴脚本<span class="sub">手绘强度曲线，自动播放</span></h2>
     <canvas id="scriptCanvas"></canvas>
     <div class="script-grid">
       <span style="width:52px">时长</span>
@@ -808,19 +854,19 @@ footer b{ color:var(--dim); }
       <button data-st="possumB">负鼠 B</button>
     </div>
     <div class="script-btns">
-      <button class="play" id="scriptPlay">▶ 播放</button>
-      <button class="pause" id="scriptPause">⏸ 暂停/继续</button>
-      <button class="stopb" id="scriptStop">⏹ 停止</button>
-      <button id="scriptClear" style="flex:0 0 84px">🧹 清空</button>
+      <button class="play" id="scriptPlay"><svg class="ic"><use href="#i-play"/></svg> 播放</button>
+      <button class="pause" id="scriptPause"><svg class="ic"><use href="#i-pause"/></svg> 暂停/继续</button>
+      <button class="stopb" id="scriptStop"><svg class="ic"><use href="#i-stop"/></svg> 停止</button>
+      <button id="scriptClear" style="flex:0 0 84px">清空</button>
     </div>
     <div id="scriptState"></div>
   </section>
 
   <section class="card" id="presetCard">
-    <h2>💾 预设方案<span class="sub">一键保存 / 恢复整套配置</span></h2>
+    <h2><svg class="ic"><use href="#i-save"/></svg> 预设方案<span class="sub">一键保存 / 恢复整套配置</span></h2>
     <div class="preset-row">
       <input type="text" id="presetName" maxlength="20" placeholder="方案名称，如：温柔入门 / 深夜加练">
-      <button class="dbtn" id="presetSave" style="padding:10px 16px;font-weight:700">保存当前</button>
+      <button class="dbtn" id="presetSave" style="padding:10px 16px;font-weight:700"><svg class="ic"><use href="#i-save"/></svg> 保存当前</button>
     </div>
     <div class="preset-list" id="presetList"></div>
   </section>
@@ -828,7 +874,7 @@ footer b{ color:var(--dim); }
 
 <div class="tab-panel" data-panel="games">
   <section class="card" id="gameCard">
-    <h2>🎮 游戏中心<span class="sub">AI 对战 & 单人挑战 · 输了的代价由设备兑现</span></h2>
+    <h2><svg class="ic"><use href="#i-games"/></svg> 游戏中心<span class="sub">AI 对战 & 单人挑战 · 输了的代价由设备兑现</span></h2>
     <div class="ch-targets" id="gameTargets">
       <button data-gt="coyoteA" class="sel">郊狼 A</button>
       <button data-gt="coyoteB" class="sel">郊狼 B</button>
@@ -838,17 +884,20 @@ footer b{ color:var(--dim); }
     <div class="slider-label"><span>惩罚基础强度（实际惩罚随连胜与随机波动，最高不超过全局上限）</span><b id="gameBaseV">80</b></div>
     <input type="range" min="20" max="200" step="5" value="80" id="gameBase" style="--fill:#ff4d5e">
     <div class="game-menu" id="gameMenu">
-      <button data-game="guess"><span class="g-ic">🎲</span>猜数字<span style="font-size:10px;color:var(--dim);font-weight:400">猜错一次罚一次，越错越狠</span></button>
-      <button data-game="rps"><span class="g-ic">✊</span>石头剪刀布<span style="font-size:10px;color:var(--dim);font-weight:400">打败 AI（连胜有加罚）</span></button>
-      <button data-game="react"><span class="g-ic">⚡</span>反应力挑战<span style="font-size:10px;color:var(--dim);font-weight:400">慢了就罚，抢跑也罚</span></button>
-      <button data-game="cards"><span class="g-ic">🃏</span>比大小<span style="font-size:10px;color:var(--dim);font-weight:400">牌比 AI 小就挨一下</span></button>
-      <button data-game="roulette"><span class="g-ic">🎰</span>命运转盘<span style="font-size:10px;color:var(--dim);font-weight:400">双倍惩罚敢不敢转</span></button>
-      <button data-game="defuse"><span class="g-ic">🧨</span>拆炸弹<span style="font-size:10px;color:var(--dim);font-weight:400">剪错线就炸，越剪越狠</span></button>
-      <button data-game="memory"><span class="g-ic">🧩</span>记忆翻牌<span style="font-size:10px;color:var(--dim);font-weight:400">翻错一次罚一次</span></button>
-      <button data-game="blackjack"><span class="g-ic">🂡</span>21点<span style="font-size:10px;color:var(--dim);font-weight:400">爆牌=重罚，输给庄家也罚</span></button>
-      <button data-game="whack"><span class="g-ic">🐹</span>打地鼠<span style="font-size:10px;color:var(--dim);font-weight:400">20 秒限时，漏一只罚一下</span></button>
-      <button data-game="tug"><span class="g-ic">💪</span>拔河<span style="font-size:10px;color:var(--dim);font-weight:400">疯狂点，被 AI 拉走就罚</span></button>
-      <button data-game="simon"><span class="g-ic">🧠</span>记忆序列<span style="font-size:10px;color:var(--dim);font-weight:400">按错就罚，关卡递增</span></button>
+      <button data-game="guess"><span class="g-ic"><svg class="ic"><use href="#i-dice"/></svg></span>猜数字<span style="font-size:10px;color:var(--dim);font-weight:400">猜错一次罚一次，越错越狠</span></button>
+      <button data-game="rps"><span class="g-ic"><svg class="ic"><use href="#i-hand"/></svg></span>石头剪刀布<span style="font-size:10px;color:var(--dim);font-weight:400">打败 AI（连胜有加罚）</span></button>
+      <button data-game="react"><span class="g-ic"><svg class="ic"><use href="#i-bolt"/></svg></span>反应力挑战<span style="font-size:10px;color:var(--dim);font-weight:400">慢了就罚，抢跑也罚</span></button>
+      <button data-game="cards"><span class="g-ic"><svg class="ic"><use href="#i-cards"/></svg></span>比大小<span style="font-size:10px;color:var(--dim);font-weight:400">牌比 AI 小就挨一下</span></button>
+      <button data-game="roulette"><span class="g-ic"><svg class="ic"><use href="#i-dice"/></svg></span>命运转盘<span style="font-size:10px;color:var(--dim);font-weight:400">双倍惩罚敢不敢转</span></button>
+      <button data-game="defuse"><span class="g-ic"><svg class="ic"><use href="#i-bomb"/></svg></span>拆炸弹<span style="font-size:10px;color:var(--dim);font-weight:400">剪错线就炸，越剪越狠</span></button>
+      <button data-game="memory"><span class="g-ic"><svg class="ic"><use href="#i-grid"/></svg></span>记忆翻牌<span style="font-size:10px;color:var(--dim);font-weight:400">翻错一次罚一次</span></button>
+      <button data-game="blackjack"><span class="g-ic"><svg class="ic"><use href="#i-cards"/></svg></span>21点<span style="font-size:10px;color:var(--dim);font-weight:400">爆牌=重罚，输给庄家也罚</span></button>
+      <button data-game="whack"><span class="g-ic"><svg class="ic"><use href="#i-target"/></svg></span>打地鼠<span style="font-size:10px;color:var(--dim);font-weight:400">20 秒限时，漏一只罚一下</span></button>
+      <button data-game="tug"><span class="g-ic"><svg class="ic"><use href="#i-rope"/></svg></span>拔河<span style="font-size:10px;color:var(--dim);font-weight:400">疯狂点，被 AI 拉走就罚</span></button>
+      <button data-game="simon"><span class="g-ic"><svg class="ic"><use href="#i-brain"/></svg></span>记忆序列<span style="font-size:10px;color:var(--dim);font-weight:400">按错就罚，关卡递增</span></button>
+      <button data-game="darts"><span class="g-ic"><svg class="ic"><use href="#i-target"/></svg></span>飞镖<span style="font-size:10px;color:var(--dim);font-weight:400">停准靶心，脱靶就罚</span></button>
+      <button data-game="stopwatch"><span class="g-ic"><svg class="ic"><use href="#i-timer"/></svg></span>精准停表<span style="font-size:10px;color:var(--dim);font-weight:400">默数 5 秒，误差大连罚</span></button>
+      <button data-game="math"><span class="g-ic"><svg class="ic"><use href="#i-calc"/></svg></span>心算<span style="font-size:10px;color:var(--dim);font-weight:400">10 秒答对，错/超时受罚</span></button>
     </div>
     <div id="gameArea"></div>
   </section>
@@ -856,7 +905,7 @@ footer b{ color:var(--dim); }
 
 <div class="tab-panel" data-panel="more">
   <section class="card" id="statsCard">
-    <h2>📊 会话统计<span class="sub">本次打开页面以来的记录</span></h2>
+    <h2><svg class="ic"><use href="#i-chart"/></svg> 会话统计<span class="sub">本次打开页面以来的记录</span></h2>
     <div class="stats-grid" id="statsGrid">
       <div class="stat"><b id="stDur">0:00</b><span>会话时长</span></div>
       <div class="stat"><b id="stPeakC">-</b><span>郊狼峰值</span></div>
@@ -868,8 +917,33 @@ footer b{ color:var(--dim); }
     <div class="row" style="margin-top:10px"><button class="dbtn" id="stReset">重置统计</button></div>
   </section>
 
+  <section class="card" id="helpCard">
+    <h2><svg class="ic"><use href="#i-link"/></svg> 三种连接方式怎么用<span class="sub">含 WebSocket 连接步骤</span></h2>
+    <div class="tips">
+      <p><b>① 蓝牙直连（最直接）</b><br>
+        安卓 Chrome / iPhone Bluefy 打开本页 → 「设备」页卡片选「蓝牙直连」 → 点连接 → 弹窗选 <code>47L121000</code>（郊狼）/ <code>47L127000</code>（负鼠）。<br>
+        <i>要求：手机浏览器支持 Web Bluetooth；先完全退出官方 App。</i></p>
+
+      <p><b>② 官方 App（WebSocket）—— 只要联网就能用</b><br>
+        1. 「设备」页 → <b>官方 App 连接</b> → 点「连接」（默认中继 <code>wss://trex.dungeon-lab.cn/v4</code>）。<br>
+        2. 等状态变成「已连中继 · 等待官方 App 配对」，页面出现二维码。<br>
+        3. 打开 <b>DG-LAB 4 官方 App</b> → 用 App 的扫码配对扫这个二维码；同一台手机上可直接点页面里的「同一台手机上，点这里直接配对」。<br>
+        4. App 里会显示已接入；回到本页，等设备标签出现（郊狼/负鼠）→ 点选设备即可控制。<br>
+        <i>连不上时点卡片上的「诊断」，会逐个探测中继并显示结果与关闭代码。</i></p>
+
+      <p><b>③ 服务器桥接（电脑蓝牙）</b><br>
+        1. 电脑双击 <code>start.bat</code>（窗口出现「BLE 桥接已就绪」）。<br>
+        2. 手机打开电脑给的地址 → 「设备」页卡片选「服务器桥接」 → 连接。<br>
+        <i>要求：电脑带蓝牙、设备在电脑 10 米内、手机与电脑同一 WiFi。</i></p>
+
+      <p><b>远程控制（房间码）</b><br>
+        需要一台运行 <code>start.bat</code> 的电脑做中继：两台手机打开同一地址 → 一端「受控端」、一端「控制端」，输入相同房间码。<br>
+        <i>纯静态托管（GitHub Pages）没有中继，此时在「中继地址」里填 <code>wss://电脑IP:端口/ws</code>；或者直接用官方 App 模式做跨设备控制。</i></p>
+    </div>
+  </section>
+
   <section class="card" id="tipsCard">
-    <h2>🍎 iPhone / iPad 使用说明<span class="sub">只用手机就能玩</span></h2>
+    <h2><svg class="ic"><use href="#i-phone"/></svg> iPhone / iPad 使用说明<span class="sub">只用手机就能玩</span></h2>
     <div class="tips">
       <p><b>1. 安装 Bluefy</b>：App Store 免费下载「Bluefy - Web BLE Browser」。Safari 不支持蓝牙，Bluefy 是 iPhone 上连接设备的浏览器。</p>
       <p><b>2. 打开本页面</b>：用 Bluefy 打开本页面地址（详见 README 的「手机版部署」：GitHub Pages 一键托管，或 a-Shell 在手机本地架服务器）。</p>
@@ -988,15 +1062,15 @@ const PATTERNS = [
   { id:'wave',     name:'波浪', ic:'∿' },
   { id:'breath',   name:'呼吸', ic:'◠' },
   { id:'stairs',   name:'阶梯', ic:'▥' },
-  { id:'random',   name:'随机', ic:'⚄' },
+  { id:'random',   name:'随机', ic:'<svg class="ic"><use href="#i-dice"/></svg>' },
   { id:'tap',      name:'轻敲', ic:'·' },
-  { id:'bpm',      name:'节拍', ic:'🥁' },
-  { id:'vortex',   name:'回旋', ic:'🌀' },
-  { id:'tide',     name:'潮汐', ic:'🌊' },
-  { id:'zap',      name:'电击', ic:'⚡' },
-  { id:'double',   name:'双峰', ic:'🎵' },
-  { id:'ai',       name:'智能随机', ic:'🧠' },
-  { id:'mic',      name:'麦克风', ic:'🎤' },
+  { id:'bpm',      name:'节拍', ic:'<svg class="ic"><use href="#i-metronome"/></svg>' },
+  { id:'vortex',   name:'回旋', ic:'<svg class="ic"><use href="#i-spiral"/></svg>' },
+  { id:'tide',     name:'潮汐', ic:'<svg class="ic"><use href="#i-wave"/></svg>' },
+  { id:'zap',      name:'电击', ic:'<svg class="ic"><use href="#i-bolt"/></svg>' },
+  { id:'double',   name:'双峰', ic:'♫' },
+  { id:'ai',       name:'智能随机', ic:'<svg class="ic"><use href="#i-brain"/></svg>' },
+  { id:'mic',      name:'麦克风', ic:'<svg class="ic"><use href="#i-mic"/></svg>' },
 ];
 const LED_COLORS = [
   { v:0x00, name:'熄灭', c:'#3a3f55' }, { v:0x01, name:'黄', c:'#ffd23f' },
@@ -1164,18 +1238,18 @@ class DeviceCtl {
   buildUI() {
     const kind = this.kind;
     const isCoy = kind === 'coyote';
-    const label = isCoy ? '🐺 郊狼 3.0（电刺激）' : '🎮 负鼠（振动控制器）';
-    const icon = isCoy ? '🐺' : '🎮';
+    const label = isCoy ? '郊狼 3.0（电刺激）' : '负鼠（振动控制器）';
+    const icon = isCoy ? '<svg class="ic"><use href="#i-paw"/></svg>' : '<svg class="ic"><use href="#i-games"/></svg>';
 
     const root = this.cardEl;
     root.innerHTML = `
       <h2>${icon} ${isCoy ? '郊狼 3.0' : '负鼠'}<span class="sub">${isCoy ? 'Coyote 3.0 · 47L121000' : 'Possum · 47L127000'}</span></h2>
 
       <div class="connect-wrap" data-sec="connect">
-        <button class="connect-btn ${isCoy ? '' : 'cyan'}" data-act="connect">🔗 连接${isCoy ? '郊狼' : '负鼠'}</button>
+        <button class="connect-btn ${isCoy ? '' : 'cyan'}" data-act="connect"><svg class="ic"><use href="#i-link"/></svg> 连接${isCoy ? '郊狼' : '负鼠'}</button>
         <div class="mode-toggle">
-          <button class="sel" data-act="modeBle">📡 蓝牙直连</button>
-          <button data-act="modeBridge">🌐 服务器桥接</button>
+          <button class="sel" data-act="modeBle"><svg class="ic"><use href="#i-scan"/></svg> 蓝牙直连</button>
+          <button data-act="modeBridge"><svg class="ic"><use href="#i-globe"/></svg> 服务器桥接</button>
         </div>
         <div class="mode-hint">手机/电脑直接蓝牙连接设备（需浏览器支持 Web Bluetooth）。</div>
         <div class="connect-hint">
@@ -1193,7 +1267,7 @@ class DeviceCtl {
           <div class="dname">${label}</div>
           <div class="dstate"><i class="dot"></i><span data-b="state">已连接</span></div>
         </div>
-        <div class="dbat">🔋 <span data-b="batt">--%</span></div>
+        <div class="dbat"><svg class="ic"><use href="#i-battery"/></svg><span data-b="batt">--%</span></div>
         <button class="dbtn warn" data-act="disconnect">断开</button>
       </div>
 
@@ -1231,7 +1305,7 @@ class DeviceCtl {
         </div>
 
         <div class="toggle">
-          <span>🔗 A/B 联动（调 A 时 B 同步跟随）</span>
+          <span><svg class="ic"><use href="#i-link"/></svg> A/B 联动（调 A 时 B 同步跟随）</span>
           <div class="switch" data-act="link"></div>
         </div>
 
@@ -1285,7 +1359,7 @@ class DeviceCtl {
           <button class="padkey" data-key="SEL_2">S2</button>
           <button class="padkey" data-key="HOME">⌂</button>
         </div>` : `
-        <div class="adv-toggle"><button data-act="advToggle">⚙️ 高级设置 ▾</button></div>
+        <div class="adv-toggle"><button data-act="advToggle"><svg class="ic"><use href="#i-gear"/></svg> 高级设置 ▾</button></div>
         <div class="adv" data-sec="adv">
           <div class="slider-label"><span>频率平衡（数值越大低频冲击感越强）</span><b data-b="fbV">160</b></div>
           <input type="range" min="0" max="255" step="1" value="160" data-act="fb" style="--fill:#8b6cff">
@@ -1293,7 +1367,7 @@ class DeviceCtl {
           <input type="range" min="0" max="255" step="1" value="0" data-act="ib" style="--fill:#8b6cff">
         </div>`}
 
-        <div class="warn-high" data-sec="warnhigh">⚠️ 当前强度较高，请确认对方耐受范围，随时可按右上角「急停」。</div>
+        <div class="warn-high" data-sec="warnhigh">注意：当前强度较高，请确认对方耐受范围，随时可按右上角「急停」。</div>
       </div>
     `;
 
@@ -1847,14 +1921,10 @@ function moveToward(cur, tgt, up, down) {
   return cur;
 }
 
-/* 每通道独立上限（设备 × 通道） */
-const CH_CAPS = { coyote: { A: 100, B: 100 }, possum: { A: 100, B: 100 } };
-const capFor = (dev, ch) => {
-  const c = CH_CAPS[dev];
-  return c && c[ch] != null ? c[ch] : 100;
-};
-// 兼容旧调用：取所有通道上限的最大值（仅用于不区分通道的提示）
-const getCap = () => Math.max(CH_CAPS.coyote.A, CH_CAPS.coyote.B, CH_CAPS.possum.A, CH_CAPS.possum.B);
+/* 全局安全上限：所有设备/通道的输出都不超过它 */
+let GLOBAL_CAP = 100;
+const capFor = () => GLOBAL_CAP;      // 保留按通道调用的签名，便于各处统一走这里
+const getCap = () => GLOBAL_CAP;
 const getRamp = () => +$('rampSlider').value;
 
 function paintSlider(el) {
@@ -1887,7 +1957,7 @@ function emergencyStop() {
   btn.classList.add('stop-flash');
   setTimeout(() => btn.classList.remove('stop-flash'), 600);
   $('restoreWrap').style.display = savedForRestore ? 'block' : 'none';
-  toast(stopped ? '🛑 已急停：所有输出立即归零' : '🛑 已急停（当前无输出）', 'warn');
+  toast(stopped ? '已急停：所有输出立即归零' : '已急停（当前无输出）', 'warn');
 }
 
 function allZero() {
@@ -2274,10 +2344,10 @@ const Remote = {
       const s = m[k];
       if (!s) return '';
       if (!s.conn) return `${icon} ${label}：<b>未连接</b> · `;
-      return `${icon} ${label}：A <b>${s.a}</b> · B <b>${s.b}</b> · ${(PATTERNS.find(p => p.id === s.pat) || {}).name || s.pat} · ${s.freq}Hz${s.batt != null ? ' · 🔋' + s.batt + '%' : ''} · `;
+      return `${icon}${label}：A <b>${s.a}</b> · B <b>${s.b}</b> · ${(PATTERNS.find(p => p.id === s.pat) || {}).name || s.pat} · ${s.freq}Hz${s.batt != null ? ' · ' + s.batt + '%' : ''} · `;
     };
     $('remoteState').innerHTML =
-      '🟢 对方在线<br>' + show('coyote', '郊狼', '🐺') + show('possum', '负鼠', '🎮');
+      '对方在线<br>' + show('coyote', '郊狼', '') + show('possum', '负鼠', '');
     // 滑块跟随（取双设备下郊狼的值，若未连接取负鼠）
     const ref = (m.coyote && m.coyote.conn) ? m.coyote : ((m.possum && m.possum.conn) ? m.possum : null);
     if (ref) {
@@ -2510,7 +2580,7 @@ const Script = {
     const mm = Math.floor(t / 60), ss = Math.floor(t % 60);
     el.textContent = (this.paused ? '⏸ 已暂停 · ' : '▶ 播放中 · ') +
       '剩余 ' + mm + ':' + String(ss).padStart(2, '0') +
-      (this.loop ? ' · 🔁循环' : '');
+      (this.loop ? ' · 循环' : '');
   },
 };
 
@@ -2671,7 +2741,7 @@ const AI = {
     const el = $('aiStatus');
     if (!el) return;
     if (!this.active) { el.textContent = '未启动 —— 先连接设备，再点「启动 AI」'; return; }
-    const phaseName = { hold: '🟢 维持', tease: '🟡 挑逗', punch: '🔴 冲击', idle: '⚪ 待机' }[this.phase] || this.phase;
+    const phaseName = { hold: '维持', tease: '挑逗', punch: '冲击', idle: '待机' }[this.phase] || this.phase;
     const sec = Math.max(0, Math.round((this.phaseEnd - performance.now()) / 1000));
     el.textContent = `${this.paused ? '⏸ 已暂停 · ' : ''}${phaseName} · 目标区间 ${this.lo}–${this.hi} · 反馈偏移 ${this.bias > 0 ? '+' : ''}${this.bias.toFixed(1)} · 阶段剩余 ${sec}s`;
   },
@@ -2699,7 +2769,96 @@ const AI = {
     $('aiLog').innerHTML = '';
     this.log('AI 启动 · 风格：' + ({ soft: '温柔', balanced: '均衡', intense: '激烈' }[this.style]));
     this.renderStatus();
+    this.startWave();
     toast('AI 智控已启动（' + ({ soft: '温柔', balanced: '均衡', intense: '激烈' }[this.style]) + '）', 'ok');
+  },
+
+  /* ---------- 实时波形（100ms 采样） ---------- */
+  wave: [], waveTimer: null,
+
+  startWave() {
+    this.wave = [];
+    clearInterval(this.waveTimer);
+    this.waveTimer = setInterval(() => this.sampleWave(), 100);
+    this.drawWave();
+  },
+  stopWave() { clearInterval(this.waveTimer); this.waveTimer = null; },
+
+  sampleWave() {
+    if (!this.active) return;
+    const now = performance.now() / 1000;
+    const valOf = (k) => {
+      const { dev, ch } = this.parse(k);
+      const d = DEVICES[dev];
+      if (!d || !d.connected) return null;
+      const applied = ch === 'A' ? d.appliedA : d.appliedB;
+      if (applied <= 0) return 0;
+      return clamp(applied * patternAmp(d, now) / 200, 0, 1);
+    };
+    const list = this.list();
+    const aVals = list.filter(k => k.endsWith('A')).map(valOf).filter(v => v !== null);
+    const bVals = list.filter(k => k.endsWith('B')).map(valOf).filter(v => v !== null);
+    const aT = list.filter(k => k.endsWith('A')).map(k => {
+      const { dev, ch } = this.parse(k); const d = DEVICES[dev];
+      return d && d.connected ? (ch === 'A' ? d.strengthA : d.strengthB) / 200 : null;
+    }).filter(v => v !== null);
+    const bT = list.filter(k => k.endsWith('B')).map(k => {
+      const { dev, ch } = this.parse(k); const d = DEVICES[dev];
+      return d && d.connected ? (ch === 'A' ? d.strengthA : d.strengthB) / 200 : null;
+    }).filter(v => v !== null);
+    this.wave.push({ a: aVals.length ? Math.max(...aVals) : null, b: bVals.length ? Math.max(...bVals) : null,
+                     ta: aT.length ? Math.max(...aT) : null, tb: bT.length ? Math.max(...bT) : null });
+    if (this.wave.length > 120) this.wave.shift();
+    this.drawWave();
+  },
+
+  drawWave() {
+    const cv = $('aiWave');
+    if (!cv) return;
+    const dpr = window.devicePixelRatio || 1;
+    const w = cv.clientWidth || 300, h = 88;
+    if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = 'rgba(255,255,255,.06)';
+    for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(0, h * i / 4); ctx.lineTo(w, h * i / 4); ctx.stroke(); }
+    const n = Math.max(2, this.wave.length);
+    const xOf = (i) => i / (n - 1) * w;
+    const yOf = (v) => h - 4 - clamp(v, 0, 1) * (h - 10);
+    const line = (key, color) => {
+      let started = false, cnt = 0;
+      ctx.beginPath();
+      ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+      ctx.shadowColor = color; ctx.shadowBlur = 6;
+      this.wave.forEach((s, i) => {
+        const v = s[key];
+        if (v == null) { started = false; return; }
+        const x = xOf(i), y = yOf(v);
+        if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+        cnt++;
+      });
+      if (cnt > 0) ctx.stroke();
+      ctx.shadowBlur = 0;
+    };
+    const dashed = (key, color) => {
+      const vals = this.wave.map(s => s[key]).filter(v => v != null);
+      if (!vals.length) return;
+      const y = yOf(Math.max(...vals));
+      ctx.beginPath(); ctx.setLineDash([5, 4]);
+      ctx.strokeStyle = color; ctx.lineWidth = 1.2;
+      ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      ctx.setLineDash([]);
+    };
+    dashed('ta', 'rgba(255,194,75,.55)');
+    dashed('tb', 'rgba(255,194,75,.35)');
+    line('a', '#27d3e6');
+    line('b', '#f26bb5');
+    if (!this.wave.length) {
+      ctx.fillStyle = 'rgba(255,255,255,.25)';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('启动 AI 后显示实时输出波形', 10, h / 2);
+    }
   },
 
   pause() {
@@ -2712,6 +2871,7 @@ const AI = {
   stop() {
     this.active = false; this.paused = false; this.phase = 'idle';
     clearInterval(this.timer); this.timer = null;
+    this.stopWave();
     this.list().forEach(k => {
       const { dev, ch } = this.parse(k);
       const d = DEVICES[dev];
@@ -2858,7 +3018,7 @@ const GAMES = {
       Game.streak = 0;
       $('gameArea').innerHTML = `
         <div class="game-box">
-          <h3>🎲 猜数字</h3>
+          <h3><svg class="ic"><use href="#i-dice"/></svg> 猜数字</h3>
           <div class="game-sub">AI 想了一个 1~100 的数字。猜错一次受罚一次，差距越小罚得越疼。猜到就赢！</div>
           <div class="guess-row">
             <input type="number" id="guessInput" min="1" max="100" inputmode="numeric" placeholder="1~100">
@@ -2881,7 +3041,7 @@ const GAMES = {
       if (v === this.secret) {
         Game.streak = 0;
         res.className = 'game-result win';
-        res.textContent = '🎉 猜中了！AI 认输！';
+        res.textContent = '猜中了！AI 认输';
         Game.reward();
         Game.log($('guessLog'), `第 ${this.guesses} 次猜中 ${this.secret} · 胜利！`);
         $('guessBtn').disabled = true;
@@ -2891,7 +3051,7 @@ const GAMES = {
         Game.streak++;
         Game.shock({ mult });
         res.className = 'game-result lose';
-        res.textContent = v > this.secret ? '📉 太大了！' : '📈 太小了！';
+        res.textContent = v > this.secret ? '太大了' : '太小了';
         Game.log($('guessLog'), `${v} → ${v > this.secret ? '太大' : '太小'} · 第 ${this.guesses} 次受罚`);
       }
       inp.value = '';
@@ -2907,11 +3067,11 @@ const GAMES = {
       Game.streak = 0;
       $('gameArea').innerHTML = `
         <div class="game-box">
-          <h3>✊ 石头剪刀布 · VS AI</h3>
+          <h3><svg class="ic"><use href="#i-hand"/></svg> 石头剪刀布 · VS AI</h3>
           <div class="game-sub">赢 4 局击败 AI。输了受罚（连败翻倍加罚），平局轻逗一下。</div>
           <div class="hp-wrap">AI 生命 <div class="hp-bar"><div class="hp-fill" id="aiHp"></div></div><span class="hp-num" id="aiHpNum">100</span></div>
           <div class="rps-btns">
-            <button data-r="0">✊</button><button data-r="1">✋</button><button data-r="2">✌</button>
+            <button data-r="0">石头</button><button data-r="1">布</button><button data-r="2">剪刀</button>
           </div>
           <div class="game-result" id="rpsResult">出招吧！</div>
           <div class="game-log" id="rpsLog"></div>
@@ -2921,7 +3081,7 @@ const GAMES = {
       bindExit();
     },
     play(me) {
-      const NAMES = ['✊', '✋', '✌'];
+      const NAMES = ['石头', '布', '剪刀'];
       let ai;
       const r = Math.random();
       if (r < 0.33) ai = (me + 1) % 3;       // AI 精准反制（有难度）
@@ -2929,15 +3089,15 @@ const GAMES = {
       else ai = Math.floor(Math.random() * 3);
       const res = $('rpsResult');
       const win = me === (ai + 1) % 3, lose = ai === (me + 1) % 3;
-      const msg = `你出 ${NAMES[me]} · AI 出 ${NAMES[ai]}`;
+      const msg = `你出 ${NAMES[me]} · 机器出 ${NAMES[ai]}`;
       if (win) {
         this.hp = Math.max(0, this.hp - 25);
         Game.streak = 0;
         res.className = 'game-result win';
-        res.textContent = '✅ 你赢了！AI −25';
+        res.textContent = '你赢了，AI −25';
         Game.log($('rpsLog'), `${msg} · 你赢`);
         if (this.hp === 0) {
-          res.textContent = '🏆 你击败了 AI！';
+          res.textContent = '你击败了 AI';
           Game.reward();
           Game.log($('rpsLog'), 'AI 倒地，胜利！');
         }
@@ -2945,12 +3105,12 @@ const GAMES = {
         Game.streak++;
         Game.shock({ mult: 1 + Game.streak * 0.25 });
         res.className = 'game-result lose';
-        res.textContent = `❌ 你输了！${Game.streak > 1 ? ' 连败 ×' + Game.streak + ' 加罚！' : ''}`;
+        res.textContent = `你输了！${Game.streak > 1 ? ' 连败 ×' + Game.streak + ' 加罚！' : ''}`;
         Game.log($('rpsLog'), `${msg} · 你输（连败 ${Game.streak}）`);
       } else {
         Game.tickle();
         res.className = 'game-result tie';
-        res.textContent = '🤝 平局，轻逗一下';
+        res.textContent = '平局，轻逗一下';
         Game.log($('rpsLog'), `${msg} · 平局`);
       }
       $('aiHp').style.width = this.hp + '%';
@@ -2967,7 +3127,7 @@ const GAMES = {
       Game.streak = 0;
       $('gameArea').innerHTML = `
         <div class="game-box">
-          <h3>⚡ 反应力挑战（5 回合）</h3>
+          <h3><svg class="ic"><use href="#i-bolt"/></svg> 反应力挑战（5 回合）</h3>
           <div class="game-sub">按钮变绿立刻按！太慢受罚（越慢越狠），抢跑同样受罚。</div>
           <button class="react-btn" id="reactBtn">准备…</button>
           <div class="game-result" id="reactResult"></div>
@@ -2991,7 +3151,7 @@ const GAMES = {
         this.state = 'go';
         this.t0 = performance.now();
         btn.classList.add('go');
-        btn.textContent = '⚡ 按！';
+        btn.textContent = '按！';
         buzz(25);
       }, 1800 + Math.random() * 3800);
     },
@@ -3001,7 +3161,7 @@ const GAMES = {
         clearTimeout(this.waitT);
         Game.shock({ mult: 0.6, ms: 350 });
         $('reactResult').className = 'game-result lose';
-        $('reactResult').textContent = '🚫 抢跑！重新等';
+        $('reactResult').textContent = '抢跑！重新等';
         Game.log($('reactLog'), `第 ${this.round} 回合抢跑 · 受罚`);
         this.beginRound();
         return;
@@ -3015,19 +3175,19 @@ const GAMES = {
       const res = $('reactResult');
       if (ms <= 350) {
         res.className = 'game-result win';
-        res.textContent = `⚡ ${ms}ms · 神速！`;
+        res.textContent = `${ms}ms · 神速`;
         Game.log($('reactLog'), `第 ${this.round} 回合 ${ms}ms · 神速`);
       } else if (ms <= 700) {
         Game.tickle();
         res.className = 'game-result tie';
-        res.textContent = `👌 ${ms}ms · 还行，轻逗`;
+        res.textContent = `${ms}ms · 还行，轻逗`;
         Game.log($('reactLog'), `第 ${this.round} 回合 ${ms}ms · 轻逗`);
       } else {
         const mult = 0.7 + (ms - 700) / 500;
         Game.streak++;
         Game.shock({ mult, ms: 450 });
         res.className = 'game-result lose';
-        res.textContent = `🐢 ${ms}ms · 太慢了！`;
+        res.textContent = `${ms}ms · 太慢了`;
         Game.log($('reactLog'), `第 ${this.round} 回合 ${ms}ms · 受罚`);
       }
       this.round++;
@@ -3038,7 +3198,7 @@ const GAMES = {
         const avg = Math.round(this.total / 5);
         btn.textContent = '结束';
         res.className = 'game-result ' + (avg <= 550 ? 'win' : 'tie');
-        res.textContent = `🏁 平均 ${avg}ms` + (avg <= 550 ? ' · 优秀！奖励' : '');
+        res.textContent = `平均 ${avg}ms` + (avg <= 550 ? ' · 优秀！奖励' : '');
         if (avg <= 550) Game.reward();
         Game.log($('reactLog'), `完成！平均反应 ${avg}ms`);
       }
@@ -3053,7 +3213,7 @@ const GAMES = {
       Game.streak = 0;
       $('gameArea').innerHTML = `
         <div class="game-box">
-          <h3>🃏 比大小 · VS AI</h3>
+          <h3><svg class="ic"><use href="#i-cards"/></svg> 比大小 · VS AI</h3>
           <div class="game-sub">一人一张牌比点数，A 最小 K 最大。比 AI 小就受罚；赢 5 局击败 AI。</div>
           <div class="hp-wrap">AI 生命 <div class="hp-bar"><div class="hp-fill" id="cdHp"></div></div><span class="hp-num" id="cdHpNum">100</span></div>
           <div class="cards-show">
@@ -3082,10 +3242,10 @@ const GAMES = {
         this.hp = Math.max(0, this.hp - 20);
         Game.streak = 0;
         res.className = 'game-result win';
-        res.textContent = '✅ 你大！AI −20';
+        res.textContent = '你大，AI −20';
         Game.log($('cdLog'), `${RANKS[me - 1]} > ${RANKS[ai - 1]} · 你赢`);
         if (this.hp === 0) {
-          res.textContent = '🏆 你击败了 AI！';
+          res.textContent = '你击败了 AI';
           Game.reward();
           Game.log($('cdLog'), 'AI 清空，胜利！');
         }
@@ -3093,12 +3253,12 @@ const GAMES = {
         Game.streak++;
         Game.shock({ mult: 1 + Game.streak * 0.2 });
         res.className = 'game-result lose';
-        res.textContent = `❌ 你小！${Game.streak > 1 ? ' 连败 ×' + Game.streak + ' 加罚！' : ''}`;
+        res.textContent = `你小！${Game.streak > 1 ? ' 连败 ×' + Game.streak + ' 加罚！' : ''}`;
         Game.log($('cdLog'), `${RANKS[me - 1]} < ${RANKS[ai - 1]} · 受罚（连败 ${Game.streak}）`);
       } else {
         Game.tickle();
         res.className = 'game-result tie';
-        res.textContent = '🤝 一样大，轻逗';
+        res.textContent = '一样大，轻逗';
         Game.log($('cdLog'), `${RANKS[me - 1]} = ${RANKS[ai - 1]} · 平局`);
       }
       $('cdHp').style.width = this.hp + '%';
@@ -3121,13 +3281,13 @@ const GAMES = {
       Game.streak = 0;
       $('gameArea').innerHTML = `
         <div class="game-box">
-          <h3>🎰 命运转盘</h3>
+          <h3><svg class="ic"><use href="#i-dice"/></svg> 命运转盘</h3>
           <div class="game-sub">转到什么就执行什么。「双倍」翻倍惩罚，「再来」自动再转一次。敢转吗？</div>
           <div class="wheel-wrap"><div class="wheel-pin">▼</div><canvas id="wheelCanvas" width="200" height="200"></canvas></div>
           <div class="game-result" id="whResult">点击转盘开始</div>
           <div class="game-log" id="whLog"></div>
           <div class="game-actions">
-            <button class="primary" id="whSpin">🎡 转！</button>
+            <button class="primary" id="whSpin">转动</button>
             <button class="danger" data-exit>退出游戏</button>
           </div>
         </div>`;
@@ -3213,33 +3373,33 @@ const GAMES = {
       switch (s.act) {
         case 'none':
           res.className = 'game-result win';
-          res.textContent = '😌 「空」安全通过！';
+          res.textContent = '「空」安全通过';
           break;
         case 'tickle':
           Game.tickle();
           res.className = 'game-result tie';
-          res.textContent = '🤏 「轻逗」一下';
+          res.textContent = '「轻逗」一下';
           break;
         case 'shock':
           Game.streak++;
           Game.shock({});
           res.className = 'game-result lose';
-          res.textContent = '⚡ 「惩罚」！';
+          res.textContent = '「惩罚」';
           break;
         case 'double':
           Game.streak += 2;
           Game.shock({ mult: 2 });
           res.className = 'game-result lose';
-          res.textContent = '💥 「双倍惩罚」！！';
+          res.textContent = '「双倍惩罚」！';
           break;
         case 'reward':
           Game.reward();
           res.className = 'game-result win';
-          res.textContent = '🎁 「奖励」轻柔波浪';
+          res.textContent = '「奖励」轻柔波浪';
           break;
         case 'again':
           res.className = 'game-result tie';
-          res.textContent = '🔁 再转一次！';
+          res.textContent = '再转一次';
           setTimeout(() => this.spin(), 900);
           break;
       }
@@ -3261,11 +3421,11 @@ const GAMES = {
       const colors = ['#ff4d5e', '#ffc24b', '#27d3e6', '#2fd692', '#8b6cff', '#f26bb5'];
       $('gameArea').innerHTML = `
         <div class="game-box">
-          <h3>🧨 拆炸弹 · 第 ${this.round} 关</h3>
+          <h3><svg class="ic"><use href="#i-bomb"/></svg> 拆炸弹 · 第 ${this.round} 关</h3>
           <div class="game-sub">${this.wires} 根线中只有一根是安全的。剪错 = 爆炸受罚，且下一剪更狠！</div>
           <div class="wires">
             ${Array.from({ length: this.wires }, (_, i) =>
-              `<button class="wire" data-w="${i}" style="border-color:${colors[i]}66">✂ ${i + 1}</button>`).join('')}
+              `<button class="wire" data-w="${i}" style="border-color:${colors[i]}66">${i + 1} 号</button>`).join('')}
           </div>
           <div class="game-result" id="dfResult">已拆除 ${this.score} 枚</div>
           <div class="game-log" id="dfLog"></div>
@@ -3279,22 +3439,22 @@ const GAMES = {
       const res = $('dfResult');
       if (i === this.bomb) {
         el.classList.add('cut');
-        el.textContent = '✅';
+        el.textContent = '✓';
         this.score++;
         Game.streak = 0;
         res.className = 'game-result win';
-        res.textContent = `🎉 拆除成功！第 ${this.round} 关通过`;
+        res.textContent = `拆除成功，第 ${this.round} 关通过`;
         Game.log($('dfLog'), `第 ${this.round} 关拆除成功`);
         Game.reward();
         this.round++;
         setTimeout(() => this.newBomb(), 1400);
       } else {
         el.classList.add('cut');
-        el.textContent = '💥';
+        el.textContent = '×';
         Game.streak++;
         Game.shock({ mult: 0.6 + Game.streak * 0.18 });
         res.className = 'game-result lose';
-        res.textContent = `💥 剪错线！已剪 ${Game.streak} 根错的`;
+        res.textContent = `剪错线！已剪 ${Game.streak} 根错的`;
         Game.log($('dfLog'), `第 ${this.round} 关剪错（第 ${Game.streak} 次）`);
       }
     },
@@ -3302,7 +3462,7 @@ const GAMES = {
 
   /* ---------- 记忆翻牌 ---------- */
   memory: {
-    emojis: ['🍎', '🍌', '🍇', '🍓', '🥕', '🍩', '🎂', '🚗'],
+    emojis: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
     cards: [], flipped: [], moves: 0, matched: 0,
     start() {
       Game.streak = 0;
@@ -3318,7 +3478,7 @@ const GAMES = {
       this.cards = deck;
       $('gameArea').innerHTML = `
         <div class="game-box">
-          <h3>🧩 记忆翻牌</h3>
+          <h3><svg class="ic"><use href="#i-grid"/></svg> 记忆翻牌</h3>
           <div class="game-sub">翻出两张一样的牌就算一对；翻错受罚（错得越多越疼）。全部配对成功即胜利！</div>
           <div class="mem-grid">${deck.map((_, i) => `<div class="mem-card" data-i="${i}">?</div>`).join('')}</div>
           <div class="game-result" id="mmResult">已配对 0/8</div>
@@ -3346,19 +3506,19 @@ const GAMES = {
             $('mmResult').textContent = `已配对 ${this.matched}/8`;
             if (this.matched === 8) {
               $('mmResult').className = 'game-result win';
-              $('mmResult').textContent = `🏆 全部配对成功！共 ${this.moves} 步`;
+              $('mmResult').textContent = `全部配对成功，共 ${this.moves} 步`;
               Game.reward();
               Game.log($('mmLog'), '全部配对，胜利！');
             } else {
               $('mmResult').className = 'game-result win';
-              $('mmResult').textContent = '✅ 配对成功！';
+              $('mmResult').textContent = '✓ 配对成功';
             }
           }, 380);
         } else {
           Game.streak++;
           Game.shock({ mult: 0.7 + Game.streak * 0.15, ms: 380 });
           $('mmResult').className = 'game-result lose';
-          $('mmResult').textContent = `❌ 不一样！翻错 ${Game.streak} 次`;
+          $('mmResult').textContent = `不一样！翻错 ${Game.streak} 次`;
           Game.log($('mmLog'), `第 ${this.moves} 步翻错（错 ${Game.streak} 次）`);
           setTimeout(() => {
             this.flipped.forEach(f => {
@@ -3401,7 +3561,7 @@ const GAMES = {
                               : [cardHtml(this.hands.d[0]), '<div class="bj-card">?</div>'].join('');
       $('gameArea').innerHTML = `
         <div class="game-box">
-          <h3>🂡 21点 · VS AI 庄家</h3>
+          <h3><svg class="ic"><use href="#i-cards"/></svg> 21点 · VS AI 庄家</h3>
           <div class="game-sub">超过 21 点 = 爆牌重罚；停牌后比庄家小也罚；赢过庄家有奖励。</div>
           <div class="bj-sum">庄家${dealerUp ? ' ' + this.sum(this.hands.d) + ' 点' : ''}</div>
           <div class="bj-row">${dCards}</div>
@@ -3426,7 +3586,7 @@ const GAMES = {
         Game.shock({ mult: 1.6 + Game.streak * 0.2, ms: 700 });
         this.render(true);
         $('bjResult').className = 'game-result lose';
-        $('bjResult').textContent = '💥 爆牌！重罚！';
+        $('bjResult').textContent = '爆牌！重罚';
         Game.log($('bjLog'), `爆牌 ${this.sum(this.hands.p)} 点（连爆 ${Game.streak} 次）`);
         this.showAgain();
       } else {
@@ -3441,19 +3601,19 @@ const GAMES = {
       if (this.bust('d') || p > d) {
         Game.streak = 0;
         res.className = 'game-result win';
-        res.textContent = '🎉 你赢了庄家！奖励';
+        res.textContent = '你赢了庄家';
         Game.reward();
         Game.log($('bjLog'), `${p} 点 胜 ${d} 点`);
       } else if (p === d) {
         Game.tickle();
         res.className = 'game-result tie';
-        res.textContent = '🤝 平局，轻逗';
+        res.textContent = '平局，轻逗';
         Game.log($('bjLog'), `${p} 点 平 ${d} 点`);
       } else {
         Game.streak++;
         Game.shock({ mult: 1 + Game.streak * 0.2 });
         res.className = 'game-result lose';
-        res.textContent = '❌ 输给庄家！';
+        res.textContent = '输给庄家';
         Game.log($('bjLog'), `${p} 点 负 ${d} 点（连败 ${Game.streak}）`);
       }
       this.showAgain();
@@ -3479,7 +3639,7 @@ const GAMES = {
       Game.streak = 0;
       $('gameArea').innerHTML = `
         <div class="game-box">
-          <h3>🐹 打地鼠</h3>
+          <h3><svg class="ic"><use href="#i-target"/></svg> 打地鼠</h3>
           <div class="game-sub">20 秒内敲到更多地鼠。漏掉一只罚一下，敲中 +1。</div>
           <div class="whack-hud"><span id="whScore">得分 0</span><span id="whTime">20s</span></div>
           <div class="whack-grid" id="whGrid">${Array.from({ length: 9 }, (_, i) => `<button class="hole" data-h="${i}"></button>`).join('')}</div>
@@ -3505,7 +3665,7 @@ const GAMES = {
       if (this.hole >= 0) this.miss();
       this.hole = Math.floor(Math.random() * 9);
       const el = document.querySelector(`.hole[data-h="${this.hole}"]`);
-      if (el) { el.textContent = '🐹'; el.classList.add('up'); }
+      if (el) { el.textContent = '?'; el.classList.add('up'); }
       this.lifeT = setTimeout(() => {
         if (this.hole >= 0) { this.miss(); this.schedule(); }
       }, 900 + Math.random() * 500);
@@ -3534,7 +3694,7 @@ const GAMES = {
       clearInterval(this.timer); clearTimeout(this.spawnT); clearTimeout(this.lifeT);
       const res = $('whResult');
       if (!res) return;
-      if (this.score >= 12) { res.className = 'game-result win'; res.textContent = '🏆 得分 ' + this.score + '，表现优秀！'; Game.reward(); }
+      if (this.score >= 12) { res.className = 'game-result win'; res.textContent = '得分 ' + this.score + '，表现优秀'; Game.reward(); }
       else { res.className = 'game-result tie'; res.textContent = '得分 ' + this.score + '（≥12 有奖励）'; }
       const grid = $('whGrid'); if (grid) grid.querySelectorAll('.hole').forEach(b => { b.disabled = true; b.textContent = ''; b.classList.remove('up'); });
     },
@@ -3548,11 +3708,11 @@ const GAMES = {
       Game.streak = 0;
       $('gameArea').innerHTML = `
         <div class="game-box">
-          <h3>💪 拔河 VS AI</h3>
+          <h3><svg class="ic"><use href="#i-rope"/></svg> 拔河 VS AI</h3>
           <div class="game-sub">疯狂点「拉！」。绳子被 AI 拉到你这边就输（受罚）；拉过 100% 就赢（奖励）。</div>
           <div class="rope"><div class="rope-mark" id="ropeMark" style="left:calc(50% - 7px)"></div></div>
           <div class="whack-hud"><span>你的力气 <b id="tugPct">50%</b></span><span id="tugInfo"></span></div>
-          <button class="connect-btn" id="tugPull" style="width:100%;margin-top:6px">💪 拉！</button>
+          <button class="connect-btn" id="tugPull" style="width:100%;margin-top:6px">拉！</button>
           <div class="game-result" id="tugResult"></div>
           <div class="game-log" id="tugLog"></div>
           <div class="game-actions"><button class="danger" data-exit>退出游戏</button></div>
@@ -3584,7 +3744,7 @@ const GAMES = {
       this.done = true; clearInterval(this.timer);
       Game.streak = 0;
       const res = $('tugResult');
-      res.className = 'game-result win'; res.textContent = '🏆 你赢啦！AI 被拖过线';
+      res.className = 'game-result win'; res.textContent = '你赢啦，AI 被拖过线';
       Game.reward();
       Game.log($('tugLog'), '胜利！');
       setTimeout(() => { if (Game.active) { this.pos = 50; this.done = false; this.render(); this.timer = setInterval(() => this.aiPull(), 650); } }, 2200);
@@ -3594,7 +3754,7 @@ const GAMES = {
       Game.streak++;
       Game.shock({ mult: 0.9 + Game.streak * 0.2, ms: 500 });
       const res = $('tugResult');
-      res.className = 'game-result lose'; res.textContent = '❌ 被拉过去了！受罚（连败 ' + Game.streak + '）';
+      res.className = 'game-result lose'; res.textContent = '被拉过去了！受罚（连败 ' + Game.streak + '）';
       Game.log($('tugLog'), '失败，绳子被拉走');
       setTimeout(() => { if (Game.active) { this.pos = 50; this.done = false; this.render(); } }, 1600);
     },
@@ -3609,7 +3769,7 @@ const GAMES = {
       Game.streak = 0;
       $('gameArea').innerHTML = `
         <div class="game-box">
-          <h3>🧠 记忆序列</h3>
+          <h3><svg class="ic"><use href="#i-brain"/></svg> 记忆序列</h3>
           <div class="game-sub">记住亮起的顺序并照着重按。按错就受罚；每过一关序列 +1。</div>
           <div class="simon-pad" id="simonPad">
             ${this.COLORS.map((c, i) => `<button class="simon-btn" data-s="${i}" style="background:${c}33;color:${c}">${i + 1}</button>`).join('')}
@@ -3652,7 +3812,7 @@ const GAMES = {
         Game.streak++;
         Game.shock({ mult: 0.7 + this.seq.length * 0.15, ms: 400 });
         const r = $('simonResult');
-        if (r) { r.className = 'game-result lose'; r.textContent = '❌ 按错了！重来这一关'; }
+        if (r) { r.className = 'game-result lose'; r.textContent = '按错了！重来这一关'; }
         Game.log($('simonLog'), '第 ' + this.seq.length + ' 关按错');
         this.input = [];
         this.playback();
@@ -3661,11 +3821,178 @@ const GAMES = {
       if (this.input.length === this.seq.length) {
         this.level = this.seq.length;
         const r = $('simonResult');
-        if (r) { r.className = 'game-result win'; r.textContent = '✅ 通过第 ' + this.level + ' 关'; }
+        if (r) { r.className = 'game-result win'; r.textContent = '✓ 通过第 ' + this.level + ' 关'; }
         Game.log($('simonLog'), '通过第 ' + this.level + ' 关');
-        if (this.level >= 6) { r.textContent = '🏆 通关！记忆大师'; Game.reward(); }
+        if (this.level >= 6) { r.textContent = '通关！记忆大师'; Game.reward(); }
         setTimeout(() => { if (Game.active) this.next(); }, 700);
       }
+    },
+  },
+
+  /* ---------- 飞镖 ---------- */
+  darts: {
+    throwNo: 0, total: 0, pos: 0, dir: 1, timer: null,
+    start() {
+      this.throwNo = 0; this.total = 0; this.pos = 0; this.dir = 1;
+      Game.streak = 0;
+      $('gameArea').innerHTML = `
+        <div class="game-box">
+          <h3><svg class="ic"><use href="#i-target"/></svg> 飞镖</h3>
+          <div class="game-sub">光标左右移动，按「投掷」把它停在靶心附近。偏离越远罚得越狠；5 镖计总分。</div>
+          <div class="dart-target"><div class="dart-zone"></div><div class="dart-needle" id="dartNeedle" style="left:0%"></div></div>
+          <div class="whack-hud"><span>第 <b id="dartNo">1</b>/5 镖</span><span>总分 <b id="dartScore">0</b></span></div>
+          <button class="connect-btn" id="dartBtn" style="width:100%">投掷</button>
+          <div class="game-result" id="dartResult"></div>
+          <div class="game-log" id="dartLog"></div>
+          <div class="game-actions"><button class="danger" data-exit>退出游戏</button></div>
+        </div>`;
+      $('dartBtn').onclick = () => this.throw();
+      bindExit();
+      this.move();
+    },
+    move() {
+      clearInterval(this.timer);
+      this.timer = setInterval(() => {
+        this.pos += this.dir * 3.2;
+        if (this.pos >= 100) { this.pos = 100; this.dir = -1; }
+        if (this.pos <= 0) { this.pos = 0; this.dir = 1; }
+        const n = $('dartNeedle');
+        if (n) n.style.left = this.pos + '%';
+      }, 16);
+    },
+    throw() {
+      if (this.throwNo >= 5) return;
+      clearInterval(this.timer); this.timer = null;
+      const dist = Math.abs(this.pos - 50);
+      const score = Math.max(0, Math.round(10 - dist / 5));
+      this.total += score; this.throwNo++;
+      const no = $('dartNo'), sc = $('dartScore'), res = $('dartResult');
+      if (sc) sc.textContent = this.total;
+      if (no) no.textContent = Math.min(5, this.throwNo + 1);
+      if (dist <= 6) { res.className = 'game-result win'; res.textContent = `正中靶心 +${score}`; }
+      else if (dist <= 20) { Game.tickle(); res.className = 'game-result tie'; res.textContent = `偏了一点 +${score}`; }
+      else { Game.streak++; Game.shock({ mult: 0.7 + Game.streak * 0.15, ms: 380 }); res.className = 'game-result lose'; res.textContent = `脱靶 +${score}`; }
+      Game.log($('dartLog'), `第 ${this.throwNo} 镖 偏离 ${Math.round(dist)}（+${score}）`);
+      if (this.throwNo >= 5) {
+        if (this.total >= 30) { res.className = 'game-result win'; res.textContent = `总分 ${this.total}，奖励`; Game.reward(); }
+        else { res.className = 'game-result tie'; res.textContent = `总分 ${this.total}（≥30 有奖励）`; }
+      } else setTimeout(() => { if (Game.active) this.move(); }, 700);
+    },
+  },
+
+  /* ---------- 精准停表 ---------- */
+  stopwatch: {
+    target: 5, state: 'idle', t0: 0, round: 0,
+    start() {
+      this.round = 0; this.state = 'idle';
+      Game.streak = 0;
+      $('gameArea').innerHTML = `
+        <div class="game-box">
+          <h3><svg class="ic"><use href="#i-timer"/></svg> 精准停表</h3>
+          <div class="game-sub">不看表，心里默数 5 秒后按停。误差 ≤0.15s 完美，>0.6s 受罚。共 5 轮。</div>
+          <div class="stopwatch-time" id="swTime">目标 5.00 秒</div>
+          <button class="connect-btn" id="swBtn" style="width:100%">▶ 开始计时</button>
+          <div class="game-result" id="swResult"></div>
+          <div class="game-log" id="swLog"></div>
+          <div class="game-actions"><button class="danger" data-exit>退出游戏</button></div>
+        </div>`;
+      $('swBtn').onclick = () => this.press();
+      bindExit();
+    },
+    press() {
+      const btn = $('swBtn'), timeEl = $('swTime'), res = $('swResult');
+      if (this.round >= 5) return;
+      if (this.state === 'idle') {
+        this.state = 'run'; this.t0 = performance.now();
+        btn.textContent = '按停'; timeEl.textContent = '计时中…'; res.textContent = '';
+        return;
+      }
+      if (this.state !== 'run') return;
+      const ms = performance.now() - this.t0;
+      this.state = 'idle'; this.round++;
+      const err = Math.abs(ms - this.target * 1000);
+      timeEl.textContent = (ms / 1000).toFixed(2) + ' 秒（误差 ' + (err / 1000).toFixed(2) + ' 秒）';
+      btn.textContent = '▶ 再来一轮';
+      if (err <= 150) { Game.streak = 0; res.className = 'game-result win'; res.textContent = '完美！'; Game.reward(); }
+      else if (err <= 600) { Game.tickle(); res.className = 'game-result tie'; res.textContent = '接近了'; }
+      else { Game.streak++; Game.shock({ mult: 0.8 + Math.min(2, err / 1000) * 0.5, ms: 450 }); res.className = 'game-result lose'; res.textContent = '误差 ' + (err / 1000).toFixed(2) + ' 秒，受罚'; }
+      Game.log($('swLog'), `第 ${this.round} 轮 ${(ms / 1000).toFixed(2)}s（误差 ${(err / 1000).toFixed(2)}s）`);
+      if (this.round >= 5) { btn.disabled = true; btn.textContent = '结束'; }
+    },
+  },
+
+  /* ---------- 心算 ---------- */
+  math: {
+    round: 0, score: 0, ans: 0, timer: null, timeLeft: 10,
+    start() {
+      this.round = 0; this.score = 0;
+      Game.streak = 0;
+      $('gameArea').innerHTML = `
+        <div class="game-box">
+          <h3><svg class="ic"><use href="#i-calc"/></svg> 心算挑战</h3>
+          <div class="game-sub">10 秒内答对继续，答错或超时受罚。共 8 题。</div>
+          <div class="math-q" id="mathQ">—</div>
+          <div class="guess-row">
+            <input type="number" id="mathInput" inputmode="numeric" placeholder="答案">
+            <button class="dbtn" id="mathBtn" style="padding:10px 16px;font-weight:800">确定</button>
+          </div>
+          <div class="whack-hud"><span>第 <b id="mathNo">1</b>/8 题</span><span id="mathTimer">10s</span></div>
+          <div class="game-result" id="mathResult"></div>
+          <div class="game-log" id="mathLog"></div>
+          <div class="game-actions"><button class="danger" data-exit>退出游戏</button></div>
+        </div>`;
+      $('mathBtn').onclick = () => this.submit();
+      $('mathInput').onkeydown = (e) => { if (e.key === 'Enter') this.submit(); };
+      bindExit();
+      this.next();
+    },
+    next() {
+      if (!Game.active) return;
+      if (this.round >= 8) { this.finish(); return; }
+      this.round++;
+      const a = 2 + Math.floor(Math.random() * 9), b = 2 + Math.floor(Math.random() * 9);
+      const plus = Math.random() < 0.5;
+      this.ans = plus ? a + b : a * b;
+      $('mathQ').textContent = `${a} ${plus ? '+' : '×'} ${b} = ?`;
+      $('mathNo').textContent = this.round;
+      $('mathInput').value = '';
+      if ($('mathInput').focus) $('mathInput').focus();
+      this.timeLeft = 10;
+      clearInterval(this.timer);
+      this.timer = setInterval(() => {
+        this.timeLeft--;
+        const t = $('mathTimer');
+        if (t) t.textContent = Math.max(0, this.timeLeft) + 's';
+        if (this.timeLeft <= 0) this.fail('超时');
+      }, 1000);
+    },
+    submit() {
+      if (!this.ans) return;
+      const v = parseInt($('mathInput').value, 10);
+      if (isNaN(v)) return;
+      if (v === this.ans) {
+        this.score++;
+        Game.streak = 0;
+        $('mathResult').className = 'game-result win';
+        $('mathResult').textContent = '✓ 正确';
+        Game.log($('mathLog'), `第 ${this.round} 题 正确`);
+        this.next();
+      } else this.fail('答错');
+    },
+    fail(why) {
+      clearInterval(this.timer);
+      Game.streak++;
+      Game.shock({ mult: 0.7 + Game.streak * 0.15, ms: 380 });
+      $('mathResult').className = 'game-result lose';
+      $('mathResult').textContent = '✗ ' + why;
+      Game.log($('mathLog'), `第 ${this.round} 题 ${why}`);
+      setTimeout(() => { if (Game.active) this.next(); }, 800);
+    },
+    finish() {
+      clearInterval(this.timer);
+      const res = $('mathResult');
+      if (this.score >= 6) { res.className = 'game-result win'; res.textContent = `答对 ${this.score}/8，奖励`; Game.reward(); }
+      else { res.className = 'game-result tie'; res.textContent = `答对 ${this.score}/8`; }
     },
   },
 };
@@ -3972,7 +4299,7 @@ const DGL = {
     const lines = [];
     for (const url of list) {
       const r = await this.probe(url);
-      lines.push((r.ok ? '✅ ' : '❌ ') + url + ' — ' + r.msg);
+      lines.push((r.ok ? '✓ ' : '× ') + url + ' — ' + r.msg);
       box.innerHTML = lines.join('<br>') + '<br>探测中…';
     }
     box.innerHTML = lines.join('<br>');
@@ -4038,7 +4365,7 @@ const DGL = {
         this.requestDevices();
         this.startEngine();
         this.render();
-        toast('官方 App 已配对 ✓ 设备已接入', 'ok');
+        toast('官方 App 已配对，设备已接入', 'ok');
         break;
       case 'client_disconnected':
         this.stopEngine();
@@ -4255,34 +4582,20 @@ const DGL = {
 
 /* ---------- 设置持久化 ---------- */
 const SETTINGS_KEY = 'dglab.ctrl.v1';
-const CAP_IDS = [
-  ['coyote', 'A', 'capCA', 'capCAv'],
-  ['coyote', 'B', 'capCB', 'capCBv'],
-  ['possum', 'A', 'capPA', 'capPAv'],
-  ['possum', 'B', 'capPB', 'capPBv'],
-];
 function syncCapUI() {
-  const vals = [];
-  CAP_IDS.forEach(([dev, ch, sid, vid]) => {
-    const v = clamp(Math.round(capFor(dev, ch)), 0, 200);
-    CH_CAPS[dev][ch] = v;
-    const el = $(sid), lb = $(vid);
-    if (el) { el.value = v; paintSlider(el); }
-    if (lb) lb.textContent = v;
-    vals.push(v);
-  });
-  const sum = $('capSum');
-  if (sum) sum.textContent = `郊狼 ${vals[0]}/${vals[1]} · 负鼠 ${vals[2]}/${vals[3]}`;
+  GLOBAL_CAP = clamp(Math.round(GLOBAL_CAP), 10, 200);
+  const el = $('capSlider'), lb = $('capVal');
+  if (el) { el.value = GLOBAL_CAP; paintSlider(el); }
+  if (lb) lb.textContent = GLOBAL_CAP;
   Object.values(DEVICES).forEach(d => { if (d) d.syncUI(); });
 }
 function loadSettings() {
   try {
     const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
-    const c = s.caps || {};
-    CH_CAPS.coyote.A = clamp(c.coyoteA != null ? c.coyoteA : (s.cap != null ? s.cap : 100), 0, 200);
-    CH_CAPS.coyote.B = clamp(c.coyoteB != null ? c.coyoteB : (s.cap != null ? s.cap : 100), 0, 200);
-    CH_CAPS.possum.A = clamp(c.possumA != null ? c.possumA : (s.cap != null ? s.cap : 100), 0, 200);
-    CH_CAPS.possum.B = clamp(c.possumB != null ? c.possumB : (s.cap != null ? s.cap : 100), 0, 200);
+    // 兼容旧版「每通道上限」存档：取其中最大值作为全局上限
+    let cap = s.cap;
+    if (cap == null && s.caps) cap = Math.max(s.caps.coyoteA || 0, s.caps.coyoteB || 0, s.caps.possumA || 0, s.caps.possumB || 0);
+    GLOBAL_CAP = clamp(cap != null ? cap : 100, 10, 200);
     syncCapUI();
     $('rampSlider').value = clamp(s.ramp || 1.2, 0.3, 5);
     $('timerMin').value = clamp(s.timerMin || 10, 1, 120);
@@ -4303,7 +4616,7 @@ function loadSettings() {
 }
 function saveSettings() {
   const s = {
-    caps: { coyoteA: CH_CAPS.coyote.A, coyoteB: CH_CAPS.coyote.B, possumA: CH_CAPS.possum.A, possumB: CH_CAPS.possum.B },
+    cap: GLOBAL_CAP,
     ramp: +$('rampSlider').value,
     timerMin: parseInt($('timerMin').value, 10) || 10,
   };
@@ -4346,35 +4659,30 @@ window.addEventListener('DOMContentLoaded', () => {
     buzz(10);
   });
 
-  // 每通道独立上限：4 条滑块
-  CAP_IDS.forEach(([dev, ch, sid, vid]) => {
-    const el = $(sid);
-    if (!el) return;
-    el.addEventListener('input', (e) => {
-      const v = +e.target.value;
-      CH_CAPS[dev][ch] = v;
-      const lb = $(vid);
-      if (lb) lb.textContent = v;
-      paintSlider(e.target);
-      const sum = $('capSum');
-      if (sum) sum.textContent = `郊狼 ${CH_CAPS.coyote.A}/${CH_CAPS.coyote.B} · 负鼠 ${CH_CAPS.possum.A}/${CH_CAPS.possum.B}`;
-      // 收低受影响通道的当前强度，并给郊狼写硬件上限
-      let clamped = false;
-      Object.values(DEVICES).forEach(d => {
-        if (!d) return;
-        if (d.kind === dev) {
-          if (ch === 'A' && d.strengthA > v) { d.strengthA = v; clamped = true; }
-          if (ch === 'B' && d.strengthB > v) { d.strengthB = v; clamped = true; }
-        }
-        if (d.kind === 'coyote' && d.connected) d.sendSettings();
-        d.syncUI();
-      });
-      if (DGL.phase === 'paired' && DGL.devKind() === dev && DGL.target[ch.toLowerCase()] > v) {
-        DGL.target[ch.toLowerCase()] = v; DGL.render();
-      }
-      if (clamped) toast(`${dev === 'coyote' ? '郊狼' : '负鼠'} ${ch} 通道已按新上限收低`, 'warn');
-      saveSettings();
+  // 全局安全上限：一条滑块覆盖所有输出
+  $('capSlider').addEventListener('input', (e) => {
+    const v = +e.target.value;
+    GLOBAL_CAP = clamp(v, 10, 200);
+    const lb = $('capVal');
+    if (lb) lb.textContent = v;
+    paintSlider(e.target);
+    let clamped = false;
+    Object.values(DEVICES).forEach(d => {
+      if (!d) return;
+      if (d.strengthA > v) { d.strengthA = v; clamped = true; }
+      if (d.strengthB > v) { d.strengthB = v; clamped = true; }
+      if (d.kind === 'coyote' && d.connected) d.sendSettings();   // 写入郊狼硬件上限
+      d.syncUI();
     });
+    if (DGL.phase === 'paired') {
+      if (DGL.target.a > v) DGL.target.a = v;
+      if (DGL.target.b > v) DGL.target.b = v;
+      DGL.render();
+    }
+    if (typeof AI !== 'undefined') { AI.hi = Math.min(AI.hi, v); AI.clampRange(); }
+    if (typeof Script !== 'undefined') Script.peak = Math.min(Script.peak, v);
+    if (clamped) toast('已按新的安全上限收低当前强度', 'warn');
+    saveSettings();
   });
   $('rampSlider').addEventListener('input', (e) => {
     $('rampVal').textContent = (+e.target.value).toFixed(1) + ' 秒';
@@ -4500,6 +4808,7 @@ window.addEventListener('DOMContentLoaded', () => {
   $('aiFeedback').querySelectorAll('button').forEach(el =>
     el.addEventListener('click', () => AI.feedback(el.dataset.fb)));
   paintSlider($('aiLo')); paintSlider($('aiHi'));
+  AI.drawWave();
 
   /* ---------- 标签页 / 场景 / 统计 ---------- */
   document.querySelectorAll('#tabbar .tab').forEach(b =>
