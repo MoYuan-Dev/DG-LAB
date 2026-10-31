@@ -492,9 +492,24 @@ canvas{ display:block; width:100%; height:64px; }
 .ai-progress{ height:5px; border-radius:3px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px; }
 .ai-progress-fill{ height:100%; width:0%; border-radius:3px; transition:width .45s linear; background:linear-gradient(90deg,#2fd692,#ffc24b); }
 .ai-meta{ margin-top:6px; font-size:10.5px; color:var(--dim2); min-height:14px; }
-.ai-feedback{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; }
-.ai-feedback button{ padding:11px 4px; border-radius:11px; border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--text); font-size:12.5px; font-weight:700; }
-.ai-feedback button:active{ transform:scale(.95); }
+.ai-feedback{ display:grid; grid-template-columns:1fr; gap:8px; margin-top:12px; }
+.ai-feedback button{
+  padding:13px 10px; border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.05);
+  color:var(--text); font-size:13.5px; font-weight:700; text-align:left; padding-left:14px;
+  transition:transform .12s, border-color .18s, background .18s;
+}
+.ai-feedback button:active{ transform:scale(.97); }
+.ai-feedback .fb-weak{ border-color:rgba(255,194,75,.35); }
+.ai-feedback .fb-weak:hover{ background:rgba(255,194,75,.12); }
+.ai-feedback .fb-strong{ border-color:rgba(255,77,94,.4); }
+.ai-feedback .fb-strong:hover{ background:rgba(255,77,94,.12); }
+.ai-feedback .fb-good{ border-color:rgba(47,214,146,.4); }
+.ai-feedback .fb-good:hover{ background:rgba(47,214,146,.12); }
+.ai-mode{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+.ai-mode button{ padding:10px 4px; border-radius:11px; border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--dim); font-size:12.5px; font-weight:700; }
+.ai-mode button.sel{ color:#fff; border-color:rgba(139,108,255,.75); background:rgba(139,108,255,.18); }
+.ai-reply{ margin-top:10px; font-size:12.5px; line-height:1.6; color:var(--dim); border-left:2px solid rgba(139,108,255,.55); padding:2px 0 2px 10px; min-height:20px; }
+.ai-reply.hot{ color:#ffd98a; border-color:rgba(255,194,75,.6); }
 
 /* ===== 打地鼠 ===== */
 .whack-hud{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--dim); margin:6px 0; }
@@ -870,11 +885,16 @@ footer b{ color:var(--dim); }
       </div>
       <canvas id="aiWave" style="height:88px"></canvas>
     </div>
-    <div class="ai-feedback" id="aiFeedback">
-      <button data-fb="low">太轻</button>
-      <button data-fb="ok">正好</button>
-      <button data-fb="high">太重</button>
+    <div class="ai-mode" id="aiMode">
+      <button data-aimode="random" class="sel">随机节奏</button>
+      <button data-aimode="feel">感受优先</button>
     </div>
+    <div class="ai-feedback" id="aiFeedback">
+      <button data-fb="weak" class="fb-weak">杂鱼~没吃饭吗</button>
+      <button data-fb="strong" class="fb-strong">啊啊啊 轻一点！主人...</button>
+      <button data-fb="good" class="fb-good">好舒服~</button>
+    </div>
+    <div class="ai-reply" id="aiReply">AI 在等你的感受…</div>
     <div class="script-btns">
       <button class="play" id="aiStart"><svg class="ic"><use href="#i-play"/></svg> 启动 AI</button>
       <button id="aiPause"><svg class="ic"><use href="#i-pause"/></svg> 暂停</button>
@@ -2720,6 +2740,7 @@ function renderPresets() {
  * ===================================================================== */
 const AI = {
   active: false, paused: false, style: 'balanced',
+  mode: 'random',            // 'random' 随机节奏 | 'feel' 感受优先
   lo: 30, hi: 90, bias: 0,
   targets: { coyoteA: true, coyoteB: true, possumA: false, possumB: false },
   phase: 'idle', phaseEnd: 0, timer: null, switchAt: 0,
@@ -2754,8 +2775,11 @@ const AI = {
   nextPhase() {
     const cfg = this.STYLE_CFG[this.style] || this.STYLE_CFG.balanced;
     const dur = (this.phase === 'hold' ? cfg.hold : this.phase === 'tease' ? cfg.tease : cfg.punch);
-    const span = dur[1] - dur[0];
-    this.phaseDur = (dur[0] + Math.random() * span) * 1000;
+    let span = dur[1] - dur[0];
+    let base = dur[0] + Math.random() * span;
+    // 感受优先：维持更久、冲击更短，节奏更听感受
+    if (this.mode === 'feel') base *= this.phase === 'hold' ? 1.4 : (this.phase === 'punch' ? 0.7 : 1);
+    this.phaseDur = base * 1000;
     this.phaseEnd = performance.now() + this.phaseDur;
   },
 
@@ -2781,7 +2805,7 @@ const AI = {
     else if (this.phase === 'punch') target = this.hi;
     else {
       const drift = Math.sin(now / 37000) * (this.hi - this.lo) * 0.15;
-      target = mid + drift + this.bias * 8;
+      target = mid + drift + this.bias * (this.mode === 'feel' ? 14 : 8);
     }
     target = clamp(target, 0, this.hi);
     // 反馈偏移缓慢衰减回中性（避免越调越偏）
@@ -2865,7 +2889,9 @@ const AI = {
     this.startedAt = Date.now();
     this.peak = 0; this.switches = 0; this.highCount = 0; this.smooth = null;
     $('aiLog').innerHTML = '';
-    this.log('AI 启动 · 风格：' + ({ soft: '温柔', balanced: '均衡', intense: '激烈' }[this.style]));
+    this.log('AI 启动 · 风格：' + ({ soft: '温柔', balanced: '均衡', intense: '激烈' }[this.style]) + ' · 模式：' + (this.mode === 'feel' ? '感受优先' : '随机节奏'));
+    const reply = $('aiReply');
+    if (reply) { reply.textContent = 'AI：我开始了，随时告诉我感受…'; reply.classList.remove('hot'); }
     this.renderStatus();
     this.startWave();
     toast('AI 智控已启动（' + ({ soft: '温柔', balanced: '均衡', intense: '激烈' }[this.style]) + '）', 'ok');
@@ -2988,23 +3014,53 @@ const AI = {
     this.log('AI 已停止，输出归零');
   },
 
+  /* 三个「感受」按钮：杂鱼~没吃饭吗 / 啊啊啊 轻一点！主人... / 好舒服~ */
+  REPLIES: {
+    weak: ['啧，这么贪心？那就再给你加一点。', '没吃饱是吧，我把力度抬上去。', '好，加一点——别喊停哦。'],
+    strong: ['好好好，轻一点……别怕。', '收到，这就降下来，慢慢来。', '是我太急了，马上放缓。'],
+    good: ['乖，那就保持这个节奏。', '嗯，舒服就好，我记下了。', '喜欢就多待一会儿，我慢慢来。'],
+  },
+
+  say(type) {
+    const pool = this.REPLIES[type] || this.REPLIES.good;
+    const line = pool[Math.floor(Math.random() * pool.length)];
+    const box = $('aiReply');
+    if (box) {
+      box.textContent = 'AI：' + line;
+      box.classList.toggle('hot', type === 'strong');
+    }
+    this.log('AI 回应：' + line);
+  },
+
   feedback(type) {
-    if (type === 'low') { this.bias = Math.min(4, this.bias + 1); this.highCount = 0; }
-    else if (type === 'high') {
-      this.bias = Math.max(-4, this.bias - 1.5);
+    if (!this.active) {
+      toast('先启动 AI，再告诉它感受', 'warn');
+      if ($('aiReply')) $('aiReply').textContent = 'AI 还没醒来 —— 点「启动 AI」';
+      return;
+    }
+    const feel = this.mode === 'feel';
+    if (type === 'weak') {
+      this.bias = Math.min(4, this.bias + (feel ? 1.6 : 1));
+      this.highCount = 0;
+    } else if (type === 'strong') {
+      this.bias = Math.max(-4, this.bias - (feel ? 2.2 : 1.5));
       this.highCount++;
-      // 连续 3 次「太重」→ 自动把上限区间降 10，避免越调越高
+      // 连续 3 次「轻一点」→ 自动把上限区间降 10，避免越调越高
       if (this.highCount >= 3) {
         this.highCount = 0;
         this.hi = Math.max(this.lo + 10, this.hi - 10);
         this.clampRange();
-        this.log('连续 3 次「太重」：上限区间自动下调至 ' + this.hi);
+        this.log('连续 3 次「轻一点」：目标上限自动下调到 ' + this.hi);
         toast('已自动下调目标上限到 ' + this.hi, 'warn');
       }
-    } else { this.bias *= 0.5; this.highCount = 0; }
-    this.log(`反馈：${{ low: '太轻', ok: '正好', high: '太重' }[type]} → 偏移 ${this.bias.toFixed(1)}`);
+    } else {
+      this.bias *= feel ? 0.2 : 0.35;
+      this.highCount = 0;
+    }
+    this.say(type);
+    this.log(`感受：${{ weak: '杂鱼~没吃饭吗', strong: '轻一点', good: '好舒服' }[type]} → 偏移 ${this.bias.toFixed(1)}`);
     this.renderStatus();
-    buzz(10);
+    buzz(12);
   },
 };
 
@@ -5131,6 +5187,12 @@ window.addEventListener('DOMContentLoaded', () => {
   $('aiStop').addEventListener('click', () => AI.stop());
   $('aiFeedback').querySelectorAll('button').forEach(el =>
     el.addEventListener('click', () => AI.feedback(el.dataset.fb)));
+  $('aiMode').querySelectorAll('button').forEach(el =>
+    el.addEventListener('click', () => {
+      AI.mode = el.dataset.aimode;
+      $('aiMode').querySelectorAll('button').forEach(b => b.classList.toggle('sel', b === el));
+      toast(AI.mode === 'feel' ? '感受优先：AI 更听你的反馈，维持更久' : '随机节奏：AI 自己带节奏', 'ok');
+    }));
   paintSlider($('aiLo')); paintSlider($('aiHi'));
   AI.drawWave();
 
