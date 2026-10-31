@@ -280,6 +280,8 @@ canvas{ display:block; width:100%; height:64px; }
 .adv.open{ display:block; }
 
 /* ===== 远程控制 ===== */
+.remote-line input.relay{ flex:1; font-size:11.5px; padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--text); }
+.relay-hint{ margin-top:6px; font-size:10.5px; color:var(--dim2); line-height:1.6; }
 .remote-line{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 .remote-line select, .remote-line input[type=text], .remote-line input[type=number]{
   padding:9px 10px; border-radius:11px; border:1px solid var(--line); background:rgba(255,255,255,.06);
@@ -346,7 +348,21 @@ canvas{ display:block; width:100%; height:64px; }
 .preset-item button:active{ transform:scale(.93); }
 .preset-empty{ color:var(--dim2); font-size:12px; }
 
+/* ===== 每通道上限 ===== */
+.cap-grid{ display:grid; grid-template-columns:1fr 1fr; gap:6px 14px; margin-top:6px; }
+@media (max-width:560px){ .cap-grid{ grid-template-columns:1fr; } }
+.cap-row{ display:flex; align-items:center; gap:8px; }
+.cap-name{ display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--dim); width:62px; flex:none; }
+.cap-dot{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+.cap-dot.a{ background:var(--cyan); box-shadow:0 0 6px var(--cyan); }
+.cap-dot.b{ background:var(--pink); box-shadow:0 0 6px var(--pink); }
+.cap-row input[type=range]{ flex:1; }
+.cap-row b{ width:30px; text-align:right; font-size:12.5px; font-variant-numeric:tabular-nums; }
+.cap-hint{ font-size:10px; color:var(--dim2); margin-left:6px; }
+
 /* ===== 官方 App 连接 ===== */
+.dgl-diag{ display:none; margin-top:8px; font-size:10.5px; line-height:1.9; color:var(--dim);
+  border:1px dashed var(--line); border-radius:10px; padding:8px 10px; word-break:break-all; }
 .pair-box{ display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap; }
 #dglQr{ width:180px; height:180px; border-radius:12px; background:#fff; flex:none; padding:5px; box-shadow:0 4px 18px rgba(0,0,0,.4); }
 .pair-info{ display:flex; flex-direction:column; gap:8px; font-size:12px; color:var(--dim); flex:1; min-width:190px; }
@@ -445,6 +461,33 @@ canvas{ display:block; width:100%; height:64px; }
 .bj-card.red{ color:#d0344c; }
 .bj-sum{ font-size:12px; color:var(--dim); text-align:center; }
 
+/* ===== AI 智控 ===== */
+.ai-range{ display:grid; grid-template-columns:1fr 1fr; gap:4px 14px; }
+@media (max-width:560px){ .ai-range{ grid-template-columns:1fr; } }
+.ai-styles{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+.ai-styles button{ padding:12px 4px; border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--dim); font-size:13px; font-weight:700; }
+.ai-styles button.sel{ color:#fff; border-color:rgba(139,108,255,.75); background:rgba(139,108,255,.18); }
+.ai-status{ margin-top:10px; font-size:12px; color:var(--amber); min-height:18px; }
+.ai-feedback{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; }
+.ai-feedback button{ padding:11px 4px; border-radius:11px; border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--text); font-size:12.5px; font-weight:700; }
+.ai-feedback button:active{ transform:scale(.95); }
+
+/* ===== 打地鼠 ===== */
+.whack-hud{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--dim); margin:6px 0; }
+.whack-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:10px 0; }
+.hole{ aspect-ratio:1; border-radius:14px; border:1px solid var(--line); background:radial-gradient(circle at 50% 40%, rgba(139,108,255,.10), rgba(0,0,0,.35)); font-size:30px; }
+.hole.up{ background:radial-gradient(circle at 50% 40%, rgba(255,194,75,.35), rgba(0,0,0,.35)); box-shadow:0 0 18px rgba(255,194,75,.45); }
+
+/* ===== 拔河 ===== */
+.rope{ position:relative; height:26px; border-radius:13px; background:linear-gradient(90deg, rgba(255,77,94,.25), rgba(139,108,255,.2), rgba(47,214,146,.25)); border:1px solid var(--line); margin:12px 0; }
+.rope-mark{ position:absolute; top:-4px; width:14px; height:34px; border-radius:7px; background:#fff; box-shadow:0 0 12px #fff; transition:left .18s; }
+
+/* ===== 记忆序列 ===== */
+.simon-pad{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:12px 0; }
+.simon-btn{ height:74px; border-radius:14px; border:2px solid rgba(255,255,255,.2); font-size:22px; font-weight:800; color:#fff; opacity:.5; transition:.1s; }
+.simon-btn.on{ opacity:1; box-shadow:0 0 26px currentColor; transform:scale(1.04); }
+.simon-btn:active{ transform:scale(.94); opacity:1; }
+
 /* ===== 提示 / 页脚 ===== */
 #toasts{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:100; display:flex; flex-direction:column; gap:8px; width:min(92vw,420px); pointer-events:none; }
 .toast{
@@ -488,6 +531,7 @@ footer b{ color:var(--dim); }
 <nav id="tabbar">
   <button class="tab active" data-tab="devices"><span class="t-ic">⚡</span>设备</button>
   <button class="tab" data-tab="games"><span class="t-ic">🎮</span>游戏</button>
+  <button class="tab" data-tab="ai"><span class="t-ic">🤖</span>AI</button>
   <button class="tab" data-tab="scenes"><span class="t-ic">🎬</span>场景</button>
   <button class="tab" data-tab="remote"><span class="t-ic">🌐</span>远程</button>
   <button class="tab" data-tab="more"><span class="t-ic">⋯</span>更多</button>
@@ -498,9 +542,30 @@ footer b{ color:var(--dim); }
   <section class="card" id="safetyCard">
     <h2>🛡️ 安全中心<span class="sub">输出安全由多重限制保障</span></h2>
     <div class="safety-grid">
-      <div class="safe-item">
-        <div class="slider-label"><span>全局强度上限（写入设备硬件限制）</span><b id="capVal">100</b></div>
-        <input type="range" id="capSlider" min="10" max="200" step="5" value="100">
+      <div class="safe-item" style="grid-column:1/-1">
+        <div class="slider-label"><span>每通道独立强度上限（同时写入郊狼硬件限制）</span><b id="capSum">100 / 100 / 100 / 100</b></div>
+        <div class="cap-grid">
+          <div class="cap-row">
+            <span class="cap-name"><i class="cap-dot a"></i>郊狼 A</span>
+            <input type="range" id="capCA" min="0" max="200" step="5" value="100">
+            <b id="capCAv">100</b>
+          </div>
+          <div class="cap-row">
+            <span class="cap-name"><i class="cap-dot b"></i>郊狼 B</span>
+            <input type="range" id="capCB" min="0" max="200" step="5" value="100">
+            <b id="capCBv">100</b>
+          </div>
+          <div class="cap-row">
+            <span class="cap-name"><i class="cap-dot a"></i>负鼠 A</span>
+            <input type="range" id="capPA" min="0" max="200" step="5" value="100">
+            <b id="capPAv">100</b>
+          </div>
+          <div class="cap-row">
+            <span class="cap-name"><i class="cap-dot b"></i>负鼠 B</span>
+            <input type="range" id="capPB" min="0" max="200" step="5" value="100">
+            <b id="capPBv">100</b>
+          </div>
+        </div>
       </div>
       <div class="safe-item">
         <div class="slider-label"><span>缓升时间（升高强度的软启动）</span><b id="rampVal">1.2 秒</b></div>
@@ -514,8 +579,8 @@ footer b{ color:var(--dim); }
           <span class="timer-display off" id="timerDisplay">--:--</span>
         </div>
       </div>
-      <div class="safe-item">
-        <div class="slider-label"><span>当前全局上限即硬件输出上限，急停/断连会立即归零</span></div>
+      <div class="safe-item" style="grid-column:1/-1">
+        <div class="slider-label"><span>上限 = 该通道的硬件输出上限；急停 / 断连会立即归零</span></div>
         <div class="row" style="margin-top:8px; gap:8px;">
           <button class="dbtn" id="allZeroBtn">全部归零</button>
           <button class="dbtn warn" id="allDisconnectBtn">断开全部设备</button>
@@ -532,8 +597,10 @@ footer b{ color:var(--dim); }
     <div class="remote-line">
       <input type="text" id="dglUrl" value="wss://trex.dungeon-lab.cn/v4" spellcheck="false"
              autocomplete="off" autocapitalize="off" placeholder="wss://中继地址">
+      <button class="dbtn" id="dglDiagBtn" style="padding:10px 12px;font-size:12.5px">🔍 诊断</button>
       <button class="dbtn" id="dglBtn" style="padding:10px 16px;font-size:14px;font-weight:700">连接</button>
     </div>
+    <div class="dgl-diag" id="dglDiag"></div>
     <div id="dglStatus" class="remote-status"><span class="remote-dot"></span> 未连接</div>
 
     <div class="remote-panel" id="dglPairPanel">
@@ -604,7 +671,12 @@ footer b{ color:var(--dim); }
              autocomplete="off" autocapitalize="characters" spellcheck="false">
       <button class="dbtn" id="remoteBtn" style="padding:10px 18px;font-size:14px;font-weight:700">连接</button>
     </div>
+    <div class="remote-line" style="margin-top:8px">
+      <input type="text" id="remoteRelay" class="relay" spellcheck="false"
+             autocomplete="off" autocapitalize="off" placeholder="中继地址（默认本页服务器）">
+    </div>
     <div id="remoteStatus"><span class="remote-dot"></span> 未连接</div>
+    <div class="relay-hint" id="remoteHint"></div>
 
     <div class="remote-panel" id="remoteWearerPanel">
       <div class="remote-state" id="wearerText">已共享给控制端 · 对方未上线</div>
@@ -658,6 +730,45 @@ footer b{ color:var(--dim); }
       </div>
       <button class="remote-stop" id="remoteStopBtn">🛑 远程急停</button>
     </div>
+  </section>
+</div>
+
+<div class="tab-panel" data-panel="ai">
+  <section class="card" id="aiCard">
+    <h2>🤖 AI 智控<span class="sub">自动升温 / 挑逗 / 冲击，按你的感受调节</span></h2>
+    <div class="ai-range">
+      <div class="safe-item">
+        <div class="slider-label"><span>目标区间 · 下限</span><b id="aiLoV">30</b></div>
+        <input type="range" id="aiLo" min="0" max="200" step="5" value="30">
+      </div>
+      <div class="safe-item">
+        <div class="slider-label"><span>目标区间 · 上限</span><b id="aiHiV">90</b></div>
+        <input type="range" id="aiHi" min="0" max="200" step="5" value="90">
+      </div>
+    </div>
+    <div class="ch-targets" id="aiTargets">
+      <button data-at="coyoteA" class="sel">郊狼 A</button>
+      <button data-at="coyoteB" class="sel">郊狼 B</button>
+      <button data-at="possumA">负鼠 A</button>
+      <button data-at="possumB">负鼠 B</button>
+    </div>
+    <div class="ai-styles" id="aiStyles">
+      <button data-style="soft" class="sel">🌙 温柔</button>
+      <button data-style="balanced">⚖️ 均衡</button>
+      <button data-style="intense">🔥 激烈</button>
+    </div>
+    <div class="ai-status" id="aiStatus">未启动 —— 先连接设备，再点「启动 AI」</div>
+    <div class="ai-feedback" id="aiFeedback">
+      <button data-fb="low">😌 太轻</button>
+      <button data-fb="ok">👌 正好</button>
+      <button data-fb="high">🥵 太重</button>
+    </div>
+    <div class="script-btns">
+      <button class="play" id="aiStart">▶ 启动 AI</button>
+      <button id="aiPause">⏸ 暂停</button>
+      <button class="stopb" id="aiStop">⏹ 停止</button>
+    </div>
+    <div class="game-log" id="aiLog" style="margin-top:10px"></div>
   </section>
 </div>
 
@@ -735,6 +846,9 @@ footer b{ color:var(--dim); }
       <button data-game="defuse"><span class="g-ic">🧨</span>拆炸弹<span style="font-size:10px;color:var(--dim);font-weight:400">剪错线就炸，越剪越狠</span></button>
       <button data-game="memory"><span class="g-ic">🧩</span>记忆翻牌<span style="font-size:10px;color:var(--dim);font-weight:400">翻错一次罚一次</span></button>
       <button data-game="blackjack"><span class="g-ic">🂡</span>21点<span style="font-size:10px;color:var(--dim);font-weight:400">爆牌=重罚，输给庄家也罚</span></button>
+      <button data-game="whack"><span class="g-ic">🐹</span>打地鼠<span style="font-size:10px;color:var(--dim);font-weight:400">20 秒限时，漏一只罚一下</span></button>
+      <button data-game="tug"><span class="g-ic">💪</span>拔河<span style="font-size:10px;color:var(--dim);font-weight:400">疯狂点，被 AI 拉走就罚</span></button>
+      <button data-game="simon"><span class="g-ic">🧠</span>记忆序列<span style="font-size:10px;color:var(--dim);font-weight:400">按错就罚，关卡递增</span></button>
     </div>
     <div id="gameArea"></div>
   </section>
@@ -843,10 +957,11 @@ function possumFrame(aI, bI) {
   }
   return fr;
 }
-// 郊狼 0xBF 设备设置：强度上限 / 频率平衡 / 强度平衡（各 A、B）
-function coyoteSettings(cap, fb, ib) {
-  const c = clamp(Math.round(cap), 0, 200), f = clamp(Math.round(fb), 0, 255), i = clamp(Math.round(ib), 0, 255);
-  return new Uint8Array([0xBF, c, c, f, f, i, i]);
+// 郊狼 0xBF 设备设置：强度上限（A、B 可不同）/ 频率平衡 / 强度平衡
+function coyoteSettings(capA, capB, fb, ib) {
+  const a = clamp(Math.round(capA), 0, 200), b = clamp(Math.round(capB), 0, 200);
+  const f = clamp(Math.round(fb), 0, 255), i = clamp(Math.round(ib), 0, 255);
+  return new Uint8Array([0xBF, a, b, f, f, i, i]);
 }
 // 负鼠 0xB3 强度（0xFF = 不变）
 function possumStrength(a, b) {
@@ -876,6 +991,10 @@ const PATTERNS = [
   { id:'random',   name:'随机', ic:'⚄' },
   { id:'tap',      name:'轻敲', ic:'·' },
   { id:'bpm',      name:'节拍', ic:'🥁' },
+  { id:'vortex',   name:'回旋', ic:'🌀' },
+  { id:'tide',     name:'潮汐', ic:'🌊' },
+  { id:'zap',      name:'电击', ic:'⚡' },
+  { id:'double',   name:'双峰', ic:'🎵' },
   { id:'ai',       name:'智能随机', ic:'🧠' },
   { id:'mic',      name:'麦克风', ic:'🎤' },
 ];
@@ -915,6 +1034,12 @@ function aiSegment(d, t) {
   return { amp: clamp(amp, 0, 1), freq, shape: s.shape };
 }
 
+// 简单可复现的伪随机（同一分段内稳定，避免 4 个子脉冲抖动）
+function seededRand(n) {
+  const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453;
+  return x - Math.floor(x);
+}
+
 // 模式幅度 0..1（t: 秒，p: 周期秒）
 function patternAmp(d, t) {
   const p = Math.max(0.3, d.period);
@@ -928,10 +1053,40 @@ function patternAmp(d, t) {
     case 'random':   return d._rand = clamp(d._rand + (Math.random() - 0.5) * 0.7, 0.05, 1);
     case 'tap':      return x * p < 0.25 ? 1 : 0;
     case 'bpm':      return (t % (60 / Math.max(30, Math.min(240, d.bpm)))) < 0.12 ? 1 : 0;
+    case 'vortex':   // 回旋：由弱到强，末端急收
+      return Math.pow(x, 0.65) * (x > 0.94 ? 0.15 : 1);
+    case 'tide': {   // 潮汐：缓慢涨潮、短暂满潮、慢慢退潮
+      if (x < 0.55) { const e = x / 0.55; return e * e * (3 - 2 * e); }
+      if (x < 0.68) return 1;
+      const f = (x - 0.68) / 0.32; return 1 - f * f * (3 - 2 * f);
+    }
+    case 'zap': {    // 电击：每段随机时刻来一下短促强击
+      const seg = Math.floor(t / Math.max(1.2, p * 0.5));
+      const r = seededRand(seg);
+      const at = seg * Math.max(1.2, p * 0.5) + 0.25 + r * (Math.max(1.2, p * 0.5) - 0.7);
+      const inBurst = t >= at && t <= at + 0.16;
+      const base = 0.12 + 0.08 * seededRand(seg + 7);
+      return inBurst ? 1 : base;
+    }
+    case 'double':   // 双峰：每周期两次起伏
+      return Math.max(0, Math.sin(x * 2 * Math.PI * 2));
     case 'ai':       return aiSegment(d, t).amp;
     case 'mic':      return clamp(Mic.level * 2.4, 0, 1);
   }
   return 1;
+}
+
+// 模式频率（Hz）：部分模式会调制频率，其余沿用 d.freq
+function patternFreqOf(d, t) {
+  const p = Math.max(0.3, d.period);
+  const x = (t % p) / p;
+  switch (d.pattern) {
+    case 'vortex': return Math.round(clamp(d.freq * (1.7 - 1.2 * x), 5, 100));
+    case 'tide':   return Math.round(clamp(d.freq * (0.85 + 0.3 * Math.sin(x * 2 * Math.PI)), 5, 100));
+    case 'double': return Math.round(clamp(d.freq * (1 + 0.35 * Math.sin(x * 2 * Math.PI * 2)), 5, 100));
+    case 'zap':    return Math.round(clamp(d.freq * (1.2 + 0.4 * seededRand(Math.floor(t))), 5, 100));
+    default:       return d.freq;
+  }
 }
 
 /* ---------- 麦克风（共享音源） ---------- */
@@ -1046,7 +1201,7 @@ class DeviceCtl {
         <div class="channel" data-ch="A">
           <div class="ch-top">
             <div class="ch-badge a">A</div>
-            <div class="ch-name">通道 A · ${isCoy ? '强度' : '振动'}</div>
+            <div class="ch-name">通道 A · ${isCoy ? '强度' : '振动'}<span class="cap-hint" data-b="capA"></span></div>
             <button class="ch-onoff active" data-act="onoffA" title="通道开关">●</button>
             <div class="ch-val a" data-b="valA">0</div>
           </div>
@@ -1062,7 +1217,7 @@ class DeviceCtl {
         <div class="channel" data-ch="B">
           <div class="ch-top">
             <div class="ch-badge b">B</div>
-            <div class="ch-name">通道 B · ${isCoy ? '强度' : '振动'}</div>
+            <div class="ch-name">通道 B · ${isCoy ? '强度' : '振动'}<span class="cap-hint" data-b="capB"></span></div>
             <button class="ch-onoff active" data-act="onoffB" title="通道开关">●</button>
             <div class="ch-val b" data-b="valB">0</div>
           </div>
@@ -1201,10 +1356,20 @@ class DeviceCtl {
     const q = s => this.cardEl.querySelector(s);
     const vA = q('[data-b="valA"]'), vB = q('[data-b="valB"]');
     const sA = q('[data-act="sliderA"]'), sB = q('[data-act="sliderB"]');
-    const val = this.chanOnA ? this.strengthA : 0, valB = this.chanOnB ? this.strengthB : 0;
+    const capA = capFor(this.kind, 'A'), capB = capFor(this.kind, 'B');
+    // 滑块量程直接绑定通道上限，物理上拖不过去
+    if (sA) { sA.max = Math.max(1, capA); }
+    if (sB) { sB.max = Math.max(1, capB); }
+    const val = Math.min(this.chanOnA ? this.strengthA : 0, capA);
+    const valB = Math.min(this.chanOnB ? this.strengthB : 0, capB);
+    this.strengthA = Math.min(this.strengthA, capA);
+    this.strengthB = Math.min(this.strengthB, capB);
     sA.value = val; sB.value = valB;
     vA.textContent = val; vB.textContent = valB;
     paintSlider(sA); paintSlider(sB);
+    const hintA = q('[data-b="capA"]'), hintB = q('[data-b="capB"]');
+    if (hintA) hintA.textContent = '上限 ' + capA;
+    if (hintB) hintB.textContent = '上限 ' + capB;
     q('[data-b="applyA"]').textContent = (Math.round(this.appliedA) !== val && this.connected) ? `实际 ${Math.round(this.appliedA)} → 目标 ${val}` : '';
     q('[data-b="applyB"]').textContent = (Math.round(this.appliedB) !== valB && this.connected) ? `实际 ${Math.round(this.appliedB)} → 目标 ${valB}` : '';
     q('[data-b="freqV"]').textContent = this.freq + ' Hz';
@@ -1481,20 +1646,23 @@ class DeviceCtl {
   }
 
   /* ---------- 控制 ---------- */
-  setTarget(ch, v) {
-    const capped = clamp(v, 0, getCap());
-    if (capped !== v) toast(`已限制在全局强度上限 ${getCap()}`, 'warn');
+  setTarget(ch, v, silent) {
+    const cap = capFor(this.kind, ch);
+    const capped = clamp(v, 0, cap);
+    if (capped !== v && !silent) toast(`${this.kind === 'coyote' ? '郊狼' : '负鼠'} ${ch} 通道已限制在上限 ${cap}`, 'warn');
     if (ch === 'A') {
       this.strengthA = capped; this.chanOnA = true;
-      if (this.link) { this.strengthB = capped; this.chanOnB = true; }
+      if (this.link) {
+        const capB = capFor(this.kind, 'B');
+        this.strengthB = Math.min(capped, capB); this.chanOnB = true;
+      }
     } else {
       this.strengthB = capped; this.chanOnB = true;
       if (this.link) this.link = false;   // 手动动 B 即断开联动
     }
     if (!this.connected) { this.appliedA = this.strengthA; this.appliedB = this.strengthB; }
-    buzz(8);
+    if (!silent) { buzz(8); saveSettings(); }
     this.syncUI();
-    saveSettings();
   }
   nudge(ch, d) {
     const cur = ch === 'A' ? this.strengthA : this.strengthB;
@@ -1578,7 +1746,7 @@ class DeviceCtl {
       } else {
         ampA = this.appliedA > 0 ? patternAmp(this, tt) : 0;
         ampB = this.appliedB > 0 ? patternAmp(this, tt) : 0;
-        fA = fB = this.freq;
+        fA = fB = patternFreqOf(this, tt);
       }
       // 智能随机的微波形：锐利 / 波浪 / 平滑
       const m = shape === 'sharp' ? (i === 0 ? 1 : 0.2)
@@ -1615,7 +1783,8 @@ class DeviceCtl {
 
   sendSettings() {
     if (this.kind !== 'coyote' || !this.connected) return;
-    this.write(coyoteSettings(getCap(), this.fb == null ? 160 : this.fb, this.ib == null ? 0 : this.ib));
+    this.write(coyoteSettings(capFor('coyote', 'A'), capFor('coyote', 'B'),
+      this.fb == null ? 160 : this.fb, this.ib == null ? 0 : this.ib));
   }
 
   sendRaw(bytes) { this.write(bytes); }
@@ -1678,7 +1847,14 @@ function moveToward(cur, tgt, up, down) {
   return cur;
 }
 
-const getCap = () => +$('capSlider').value;
+/* 每通道独立上限（设备 × 通道） */
+const CH_CAPS = { coyote: { A: 100, B: 100 }, possum: { A: 100, B: 100 } };
+const capFor = (dev, ch) => {
+  const c = CH_CAPS[dev];
+  return c && c[ch] != null ? c[ch] : 100;
+};
+// 兼容旧调用：取所有通道上限的最大值（仅用于不区分通道的提示）
+const getCap = () => Math.max(CH_CAPS.coyote.A, CH_CAPS.coyote.B, CH_CAPS.possum.A, CH_CAPS.possum.B);
 const getRamp = () => +$('rampSlider').value;
 
 function paintSlider(el) {
@@ -1689,6 +1865,7 @@ function paintSlider(el) {
 function emergencyStop() {
   Script.stop(false);
   if (typeof Game !== 'undefined') Game.end();
+  if (typeof AI !== 'undefined' && AI.active) AI.stop();
   if (typeof DGL !== 'undefined') DGL.zero();
   savedForRestore = null;
   let stopped = false;
@@ -1879,7 +2056,7 @@ const Bridge = {
 /* =====================================================================
  * 标签页切换 / 会话统计 / 快捷场景
  * ===================================================================== */
-const TABS = ['devices', 'games', 'scenes', 'remote', 'more'];
+const TABS = ['devices', 'games', 'ai', 'scenes', 'remote', 'more'];
 
 function showTab(id) {
   if (!TABS.includes(id)) id = 'devices';
@@ -1920,20 +2097,20 @@ const SCENES = [
 function applyScene(id) {
   const s = SCENES.find(x => x.id === id);
   if (!s) return;
-  const cap = getCap();
   let clipped = false;
   ['coyote', 'possum'].forEach(k => {
     const d = DEVICES[k];
     if (!d) return;
     d.setPattern(s.pattern);
     d.freq = s.freq;
-    d.strengthA = Math.min(s.a, cap); d.chanOnA = true;
-    d.strengthB = Math.min(s.b, cap); d.chanOnB = true;
-    if (s.a > cap || s.b > cap) clipped = true;
+    const ca = capFor(k, 'A'), cb = capFor(k, 'B');
+    d.strengthA = Math.min(s.a, ca); d.chanOnA = true;
+    d.strengthB = Math.min(s.b, cb); d.chanOnB = true;
+    if (s.a > ca || s.b > cb) clipped = true;
     d.syncUI();
   });
   saveSettings();
-  toast('已应用「' + s.name + '」场景（双设备 A/B）' + (clipped ? ' · 已按全局上限收低' : ''), clipped ? 'warn' : 'ok');
+  toast('已应用「' + s.name + '」场景（双设备 A/B）' + (clipped ? ' · 已按通道上限收低' : ''), clipped ? 'warn' : 'ok');
   buzz(12);
 }
 
@@ -1951,18 +2128,28 @@ const Remote = {
   connect() {
     const code = $('remoteCode').value.trim().toUpperCase();
     if (!/^[A-Z0-9]{4,8}$/.test(code)) { toast('请输入 4-8 位房间码（字母数字）', 'warn'); return; }
-    if (this.ws && this.ws.readyState === 1) { this.ws.close(); }
+    if (this.ws && this.ws.readyState === 1) { try { this._manual = true; this.ws.close(); } catch (e) {} }
     this.role = $('remoteRole').value;
     this.code = code;
     this.peerOnline = false;
-    const proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
-    const ws = new WebSocket(proto + location.host + '/ws');
+    const url = this.resolveUrl();
+    this._manual = false;
+    this._opened = false;
+    let ws;
+    try { ws = new WebSocket(url); }
+    catch (e) { toast('中继地址无效：' + (e && e.message ? e.message : e), 'err', 6000); return; }
     this.ws = ws;
+    this._timer = setTimeout(() => {
+      if (!this._opened) { try { ws.close(); } catch (e) {} }
+    }, 10000);
     ws.onopen = () => {
+      this._opened = true;
+      clearTimeout(this._timer);
       this.connected = true;
       ws.send(JSON.stringify({ t: 'hello', role: this.role, code: this.code }));
       if (this.role === 'wearer') {
         this.statusTimer = setInterval(() => this.sendStatus(), 500);
+        toast('已加入房间 ' + this.code + '，等待控制端…', 'ok');
       } else {
         this.hbTimer = setInterval(() => this.send({ t: 'heartbeat' }), 5000);
         toast('已加入房间 ' + this.code + '，等待受控端上线…', 'ok');
@@ -1970,17 +2157,44 @@ const Remote = {
       this.updateUI();
     };
     ws.onmessage = (e) => this.onMessage(e.data);
-    ws.onclose = () => {
+    ws.onclose = (ev) => {
+      const opened = this._opened;
       this.connected = false; this.peerOnline = false;
+      clearTimeout(this._timer);
       clearInterval(this.statusTimer); clearInterval(this.hbTimer);
       this.statusTimer = this.hbTimer = null;
       this.updateUI();
-      toast('远程连接已断开', 'warn');
+      if (this._manual) { this._manual = false; return; }
+      const why = ev && ev.code ? ('（代码 ' + ev.code + '）') : '';
+      if (!opened) {
+        toast('连不上中继 ' + this.relayLabel() + why + '：手机需能访问该地址。静态托管页面请填电脑 start.bat 给的地址，如 wss://192.168.1.5:8080/ws', 'err', 9000);
+      } else {
+        toast('远程连接已断开' + why, 'warn');
+      }
     };
     ws.onerror = () => {};
   },
 
+  relayLabel() {
+    try { return new URL(this.resolveUrl()).host; } catch (e) { return String(this.resolveUrl()); }
+  },
+
+  // 中继地址：留空 = 本页所在服务器 /ws；也支持 ws(s)://完整地址
+  resolveUrl() {
+    const raw = (($('remoteRelay') && $('remoteRelay').value) || '').trim();
+    if (raw) {
+      if (/^wss?:\/\//i.test(raw)) return raw;
+      if (/^\/\//.test(raw)) return (location.protocol === 'https:' ? 'wss:' : 'ws:') + raw;
+      // 只填了 host[:port] / 路径
+      const proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
+      return proto + raw.replace(/^\/+/, '');
+    }
+    const proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
+    return proto + location.host + '/ws';
+  },
+
   disconnect() {
+    this._manual = true;
     try { this.ws && this.ws.close(); } catch (e) {}
   },
 
@@ -2275,14 +2489,14 @@ const Script = {
       }
     }
     const pos = this.dur > 0 ? this.tAcc / this.dur : 0;
-    let v = Math.round(this.valueAt(pos) * this.peak);
-    v = Math.min(v, getCap());   // 静默遵守全局上限
+    const v = Math.round(this.valueAt(pos) * this.peak);
     Object.keys(this.targets).forEach(k => {
       if (!this.targets[k]) return;
       const dev = k.startsWith('coyote') ? 'coyote' : 'possum';
       const ch = k.endsWith('A') ? 'A' : 'B';
+      const cap = capFor(dev, ch);              // 静默遵守该通道上限
       const d = DEVICES[dev];
-      if (d && d.connected) d.setTarget(ch, v);
+      if (d && d.connected) d.setTarget(ch, Math.min(v, cap), true);
     });
     this.updateState();
     this.draw();
@@ -2363,7 +2577,162 @@ function renderPresets() {
 }
 
 /* =====================================================================
- * 游戏中心：AI 对战与单人挑战（惩罚经设备兑现，全部受全局上限约束）
+ * AI 智控：按目标区间自动「升温 / 维持 / 挑逗 / 冲击」，并根据感受反馈自适应
+ * ===================================================================== */
+const AI = {
+  active: false, paused: false, style: 'balanced',
+  lo: 30, hi: 90, bias: 0,
+  targets: { coyoteA: true, coyoteB: true, possumA: false, possumB: false },
+  phase: 'idle', phaseEnd: 0, timer: null, switchAt: 0,
+  PATTERNS_BY_STYLE: {
+    soft:     ['wave', 'breath', 'tide', 'vortex', 'constant'],
+    balanced: ['wave', 'breath', 'stairs', 'double', 'tide', 'random'],
+    intense:  ['pulse', 'zap', 'stairs', 'double', 'ai', 'random'],
+  },
+  STYLE_CFG: {
+    soft:     { hold: [12, 18], tease: [4, 6], punch: [2, 3], gap: 1.0 },
+    balanced: { hold: [10, 14], tease: [3, 5], punch: [2, 3], gap: 0.6 },
+    intense:  { hold: [7, 10],  tease: [2, 4], punch: [3, 4], gap: 0.3 },
+  },
+
+  list() { return Object.keys(this.targets).filter(k => this.targets[k]); },
+
+  parse(k) {
+    return { dev: k.startsWith('coyote') ? 'coyote' : 'possum', ch: k.endsWith('A') ? 'A' : 'B' };
+  },
+
+  clampRange() {
+    this.lo = clamp(Math.round(this.lo), 0, 200);
+    this.hi = clamp(Math.round(this.hi), 0, 200);
+    if (this.lo > this.hi) { const t = this.lo; this.lo = this.hi; this.hi = t; }
+    if ($('aiLo')) { $('aiLo').value = this.lo; paintSlider($('aiLo')); }
+    if ($('aiHi')) { $('aiHi').value = this.hi; paintSlider($('aiHi')); }
+    if ($('aiLoV')) $('aiLoV').textContent = this.lo;
+    if ($('aiHiV')) $('aiHiV').textContent = this.hi;
+  },
+
+  nextPhase() {
+    const cfg = this.STYLE_CFG[this.style] || this.STYLE_CFG.balanced;
+    const now = performance.now();
+    const dur = (this.phase === 'hold' ? cfg.hold : this.phase === 'tease' ? cfg.tease : cfg.punch);
+    const span = dur[1] - dur[0];
+    this.phaseEnd = now + (dur[0] + Math.random() * span) * 1000;
+  },
+
+  step() {
+    if (!this.active) return;
+    const now = performance.now();
+    if (this.paused) return;
+    if (now >= this.phaseEnd) {
+      const order = ['hold', 'tease', 'punch'];
+      let i = order.indexOf(this.phase);
+      i = (i + 1) % order.length;
+      this.phase = order[i];
+      this.nextPhase();
+      if (this.phase === 'tease') this.log('进入挑逗：短暂降到低谷');
+      else if (this.phase === 'punch') this.log('冲击：短促拉高');
+      else this.log('维持区间中心');
+    }
+    // 目标值
+    const cfg = this.STYLE_CFG[this.style] || this.STYLE_CFG.balanced;
+    const mid = (this.lo + this.hi) / 2;
+    let target;
+    if (this.phase === 'tease') target = Math.max(0, this.lo * 0.35);
+    else if (this.phase === 'punch') target = this.hi;
+    else {
+      const drift = Math.sin(now / 37000) * (this.hi - this.lo) * 0.15;
+      target = mid + drift + this.bias * 8;
+    }
+    target = clamp(target, 0, this.hi);
+    // 应用（逐通道上限由 setTarget 内部处理）
+    this.list().forEach(k => {
+      const { dev, ch } = this.parse(k);
+      const d = DEVICES[dev];
+      if (!d || !d.connected) return;
+      const cap = capFor(dev, ch);
+      d.setTarget(ch, clamp(Math.round(target * (0.9 + Math.random() * 0.2)), 0, Math.min(cap, this.hi)), true);
+    });
+    // 每隔一段时间自动换波形
+    if (now >= this.switchAt) {
+      const pool = this.PATTERNS_BY_STYLE[this.style] || this.PATTERNS_BY_STYLE.balanced;
+      const p = pool[Math.floor(Math.random() * pool.length)];
+      this.list().forEach(k => {
+        const { dev } = this.parse(k);
+        const d = DEVICES[dev];
+        if (d && d.connected) { d.pattern = p; d.syncUI(); }
+      });
+      this.switchAt = now + (9000 + Math.random() * 9000);
+      this.log('自动切换波形：' + (PATTERNS.find(x => x.id === p) || {}).name);
+    }
+    this.renderStatus();
+  },
+
+  renderStatus() {
+    const el = $('aiStatus');
+    if (!el) return;
+    if (!this.active) { el.textContent = '未启动 —— 先连接设备，再点「启动 AI」'; return; }
+    const phaseName = { hold: '🟢 维持', tease: '🟡 挑逗', punch: '🔴 冲击', idle: '⚪ 待机' }[this.phase] || this.phase;
+    const sec = Math.max(0, Math.round((this.phaseEnd - performance.now()) / 1000));
+    el.textContent = `${this.paused ? '⏸ 已暂停 · ' : ''}${phaseName} · 目标区间 ${this.lo}–${this.hi} · 反馈偏移 ${this.bias > 0 ? '+' : ''}${this.bias.toFixed(1)} · 阶段剩余 ${sec}s`;
+  },
+
+  log(text) {
+    const box = $('aiLog');
+    if (!box) return;
+    box.insertAdjacentHTML('beforeend', '<div>' + new Date().toTimeString().slice(0, 8) + ' · ' + text + '</div>');
+    while (box.children.length > 7) box.removeChild(box.firstChild);
+    box.scrollTop = box.scrollHeight;
+  },
+
+  start() {
+    if (!this.list().length) { toast('请先选择受控通道', 'warn'); return; }
+    if (!this.list().some(k => DEVICES[this.parse(k).dev].connected)) {
+      toast('没有设备连接，AI 会在连接后开始输出', 'warn', 4500);
+    }
+    this.clampRange();
+    this.active = true; this.paused = false;
+    this.phase = 'hold'; this.bias = 0;
+    this.nextPhase();
+    this.switchAt = 0;
+    clearInterval(this.timer);
+    this.timer = setInterval(() => this.step(), 1000);
+    $('aiLog').innerHTML = '';
+    this.log('AI 启动 · 风格：' + ({ soft: '温柔', balanced: '均衡', intense: '激烈' }[this.style]));
+    this.renderStatus();
+    toast('AI 智控已启动（' + ({ soft: '温柔', balanced: '均衡', intense: '激烈' }[this.style]) + '）', 'ok');
+  },
+
+  pause() {
+    if (!this.active) return;
+    this.paused = !this.paused;
+    this.renderStatus();
+    toast(this.paused ? 'AI 已暂停（保持当前强度）' : 'AI 继续', 'warn');
+  },
+
+  stop() {
+    this.active = false; this.paused = false; this.phase = 'idle';
+    clearInterval(this.timer); this.timer = null;
+    this.list().forEach(k => {
+      const { dev, ch } = this.parse(k);
+      const d = DEVICES[dev];
+      if (d) d.setTarget(ch, 0, true);
+    });
+    this.renderStatus();
+    this.log('AI 已停止，输出归零');
+  },
+
+  feedback(type) {
+    if (type === 'low') this.bias = Math.min(4, this.bias + 1);
+    else if (type === 'high') this.bias = Math.max(-4, this.bias - 1.5);
+    else this.bias *= 0.5;
+    this.log(`反馈：${{ low: '太轻', ok: '正好', high: '太重' }[type]} → 偏移 ${this.bias.toFixed(1)}`);
+    this.renderStatus();
+    buzz(10);
+  },
+};
+
+/* =====================================================================
+ * 游戏中心：AI 对战与单人挑战（惩罚经设备兑现，全部受上限约束）
  * ===================================================================== */
 const Game = {
   active: false, current: null,
@@ -2380,9 +2749,9 @@ const Game = {
     const { dev, ch } = this.parse(k);
     const d = DEVICES[dev];
     if (!d || !d.connected) return;
-    d.setTarget(ch, v);
+    d.setTarget(ch, Math.min(v, capFor(dev, ch)), true);
     clearTimeout(this.chanTimers[k]);
-    this.chanTimers[k] = setTimeout(() => { d.setTarget(ch, 0); }, ms);
+    this.chanTimers[k] = setTimeout(() => { d.setTarget(ch, 0, true); }, ms);
   },
 
   // 惩罚：随机挑通道（多选时 80% 只打单边，增加变化感）+ 随机强度/时长 + 连胜加罚
@@ -2394,10 +2763,14 @@ const Game = {
       chans = [list[Math.floor(Math.random() * list.length)]];
     }
     const mult = (opts && opts.mult) || 1;
-    const v = Math.round(Math.min(getCap(),
-      this.base * mult * (1 + this.streak * 0.12) * (0.85 + Math.random() * 0.3)));
     const ms = (opts && opts.ms) || (300 + Math.floor(Math.random() * 600));
-    chans.forEach(k => this.pulse(k, v, ms));
+    chans.forEach(k => {
+      const { dev, ch } = this.parse(k);
+      const cap = capFor(dev, ch);
+      const v = Math.round(Math.min(cap,
+        this.base * mult * (1 + this.streak * 0.12) * (0.85 + Math.random() * 0.3)));
+      this.pulse(k, v, ms);
+    });
     Stats.shocks++;
     buzz(25);
   },
@@ -2405,8 +2778,10 @@ const Game = {
   tickle() {
     const list = this.list();
     if (!list.length) return;
-    const v = Math.round(Math.min(getCap(), this.base * 0.3));
-    list.forEach(k => this.pulse(k, v, 220));
+    list.forEach(k => {
+      const { dev, ch } = this.parse(k);
+      this.pulse(k, Math.round(Math.min(capFor(dev, ch), this.base * 0.3)), 220);
+    });
   },
 
   reward() {
@@ -2414,8 +2789,11 @@ const Game = {
     const t = setInterval(() => {
       if (!this.active) { clearInterval(t); return; }
       i++;
-      const v = Math.round(Math.min(getCap(), this.base * 0.35));
-      this.list().forEach(k => this.pulse(k, i % 2 ? v : Math.round(v * 0.5), 450));
+      this.list().forEach(k => {
+        const { dev, ch } = this.parse(k);
+        const v = Math.round(Math.min(capFor(dev, ch), this.base * 0.35));
+        this.pulse(k, i % 2 ? v : Math.round(v * 0.5), 450);
+      });
       if (i > 7) clearInterval(t);
     }, 500);
   },
@@ -3092,6 +3470,204 @@ const GAMES = {
       }, 1200);
     },
   },
+
+  /* ---------- 打地鼠 ---------- */
+  whack: {
+    score: 0, timeLeft: 20, hole: -1, timer: null, spawnT: null, lifeT: null,
+    start() {
+      this.score = 0; this.timeLeft = 20; this.hole = -1;
+      Game.streak = 0;
+      $('gameArea').innerHTML = `
+        <div class="game-box">
+          <h3>🐹 打地鼠</h3>
+          <div class="game-sub">20 秒内敲到更多地鼠。漏掉一只罚一下，敲中 +1。</div>
+          <div class="whack-hud"><span id="whScore">得分 0</span><span id="whTime">20s</span></div>
+          <div class="whack-grid" id="whGrid">${Array.from({ length: 9 }, (_, i) => `<button class="hole" data-h="${i}"></button>`).join('')}</div>
+          <div class="game-result" id="whResult"></div>
+          <div class="game-log" id="whLog"></div>
+          <div class="game-actions"><button class="danger" data-exit>退出游戏</button></div>
+        </div>`;
+      document.querySelectorAll('.hole').forEach(b => b.onclick = () => this.hit(+b.dataset.h));
+      bindExit();
+      this.timer = setInterval(() => {
+        this.timeLeft--;
+        const t = $('whTime'); if (t) t.textContent = Math.max(0, this.timeLeft) + 's';
+        if (this.timeLeft <= 0) this.end();
+      }, 1000);
+      this.schedule();
+    },
+    schedule() {
+      clearTimeout(this.spawnT);
+      this.spawnT = setTimeout(() => this.spawn(), 450 + Math.random() * 700);
+    },
+    spawn() {
+      if (!Game.active) return;
+      if (this.hole >= 0) this.miss();
+      this.hole = Math.floor(Math.random() * 9);
+      const el = document.querySelector(`.hole[data-h="${this.hole}"]`);
+      if (el) { el.textContent = '🐹'; el.classList.add('up'); }
+      this.lifeT = setTimeout(() => {
+        if (this.hole >= 0) { this.miss(); this.schedule(); }
+      }, 900 + Math.random() * 500);
+    },
+    hit(i) {
+      if (i !== this.hole) return;
+      clearTimeout(this.lifeT);
+      const el = document.querySelector(`.hole[data-h="${i}"]`);
+      if (el) { el.textContent = ''; el.classList.remove('up'); }
+      this.hole = -1;
+      this.score++;
+      const s = $('whScore'); if (s) s.textContent = '得分 ' + this.score;
+      buzz(8);
+      this.schedule();
+    },
+    miss() {
+      clearTimeout(this.lifeT);
+      const el = this.hole >= 0 ? document.querySelector(`.hole[data-h="${this.hole}"]`) : null;
+      if (el) { el.textContent = ''; el.classList.remove('up'); }
+      this.hole = -1;
+      Game.streak++;
+      Game.shock({ mult: 0.65 + Game.streak * 0.12, ms: 300 });
+      Game.log($('whLog'), '漏掉一只（连漏 ' + Game.streak + '）');
+    },
+    end() {
+      clearInterval(this.timer); clearTimeout(this.spawnT); clearTimeout(this.lifeT);
+      const res = $('whResult');
+      if (!res) return;
+      if (this.score >= 12) { res.className = 'game-result win'; res.textContent = '🏆 得分 ' + this.score + '，表现优秀！'; Game.reward(); }
+      else { res.className = 'game-result tie'; res.textContent = '得分 ' + this.score + '（≥12 有奖励）'; }
+      const grid = $('whGrid'); if (grid) grid.querySelectorAll('.hole').forEach(b => { b.disabled = true; b.textContent = ''; b.classList.remove('up'); });
+    },
+  },
+
+  /* ---------- 拔河 ---------- */
+  tug: {
+    pos: 50, timer: null, done: false,
+    start() {
+      this.pos = 50; this.done = false;
+      Game.streak = 0;
+      $('gameArea').innerHTML = `
+        <div class="game-box">
+          <h3>💪 拔河 VS AI</h3>
+          <div class="game-sub">疯狂点「拉！」。绳子被 AI 拉到你这边就输（受罚）；拉过 100% 就赢（奖励）。</div>
+          <div class="rope"><div class="rope-mark" id="ropeMark" style="left:calc(50% - 7px)"></div></div>
+          <div class="whack-hud"><span>你的力气 <b id="tugPct">50%</b></span><span id="tugInfo"></span></div>
+          <button class="connect-btn" id="tugPull" style="width:100%;margin-top:6px">💪 拉！</button>
+          <div class="game-result" id="tugResult"></div>
+          <div class="game-log" id="tugLog"></div>
+          <div class="game-actions"><button class="danger" data-exit>退出游戏</button></div>
+        </div>`;
+      $('tugPull').onclick = () => this.pull();
+      bindExit();
+      clearInterval(this.timer);
+      this.timer = setInterval(() => this.aiPull(), 650);
+    },
+    render() {
+      const m = $('ropeMark'); if (m) m.style.left = 'calc(' + this.pos + '% - 7px)';
+      const p = $('tugPct'); if (p) p.textContent = Math.round(this.pos) + '%';
+    },
+    pull() {
+      if (this.done) return;
+      this.pos = Math.min(100, this.pos + 6);
+      this.render();
+      buzz(6);
+      if (this.pos >= 100) this.win();
+    },
+    aiPull() {
+      if (this.done) return;
+      const strength = 3.5 + Math.random() * 3.5 + Math.max(0, (this.pos - 50) / 18);
+      this.pos = Math.max(0, this.pos - strength);
+      this.render();
+      if (this.pos <= 0) this.lose();
+    },
+    win() {
+      this.done = true; clearInterval(this.timer);
+      Game.streak = 0;
+      const res = $('tugResult');
+      res.className = 'game-result win'; res.textContent = '🏆 你赢啦！AI 被拖过线';
+      Game.reward();
+      Game.log($('tugLog'), '胜利！');
+      setTimeout(() => { if (Game.active) { this.pos = 50; this.done = false; this.render(); this.timer = setInterval(() => this.aiPull(), 650); } }, 2200);
+    },
+    lose() {
+      this.done = true;
+      Game.streak++;
+      Game.shock({ mult: 0.9 + Game.streak * 0.2, ms: 500 });
+      const res = $('tugResult');
+      res.className = 'game-result lose'; res.textContent = '❌ 被拉过去了！受罚（连败 ' + Game.streak + '）';
+      Game.log($('tugLog'), '失败，绳子被拉走');
+      setTimeout(() => { if (Game.active) { this.pos = 50; this.done = false; this.render(); } }, 1600);
+    },
+  },
+
+  /* ---------- 记忆序列 ---------- */
+  simon: {
+    seq: [], input: [], showing: false, level: 0, flashT: [],
+    COLORS: ['#ff4d5e', '#ffc24b', '#2fd692', '#4d7bff'],
+    start() {
+      this.seq = []; this.input = []; this.level = 1; this.showing = false;
+      Game.streak = 0;
+      $('gameArea').innerHTML = `
+        <div class="game-box">
+          <h3>🧠 记忆序列</h3>
+          <div class="game-sub">记住亮起的顺序并照着重按。按错就受罚；每过一关序列 +1。</div>
+          <div class="simon-pad" id="simonPad">
+            ${this.COLORS.map((c, i) => `<button class="simon-btn" data-s="${i}" style="background:${c}33;color:${c}">${i + 1}</button>`).join('')}
+          </div>
+          <div class="game-result" id="simonResult">准备…</div>
+          <div class="game-log" id="simonLog"></div>
+          <div class="game-actions"><button class="danger" data-exit>退出游戏</button></div>
+        </div>`;
+      document.querySelectorAll('[data-s]').forEach(b => b.onclick = () => this.press(+b.dataset.s));
+      bindExit();
+      this.next();
+    },
+    next() {
+      this.seq.push(Math.floor(Math.random() * 4));
+      this.playback();
+    },
+    playback() {
+      this.showing = true; this.input = [];
+      const res = $('simonResult');
+      if (res) { res.className = 'game-result tie'; res.textContent = '观察… 第 ' + this.seq.length + ' 关'; }
+      let i = 0;
+      const step = () => {
+        if (!Game.active) return;
+        if (i >= this.seq.length) { this.showing = false; const r = $('simonResult'); if (r) { r.className = 'game-result'; r.textContent = '轮到你了（' + this.seq.length + ' 步）'; } return; }
+        const idx = this.seq[i++];
+        const btn = document.querySelector(`[data-s="${idx}"]`);
+        if (btn) { btn.classList.add('on'); setTimeout(() => btn.classList.remove('on'), 320); }
+        buzz(10);
+        setTimeout(step, 560);
+      };
+      setTimeout(step, 500);
+    },
+    press(i) {
+      if (this.showing) return;
+      this.input.push(i);
+      const k = this.input.length - 1;
+      const btn = document.querySelector(`[data-s="${i}"]`);
+      if (btn) { btn.classList.add('on'); setTimeout(() => btn.classList.remove('on'), 160); }
+      if (this.seq[k] !== i) {
+        Game.streak++;
+        Game.shock({ mult: 0.7 + this.seq.length * 0.15, ms: 400 });
+        const r = $('simonResult');
+        if (r) { r.className = 'game-result lose'; r.textContent = '❌ 按错了！重来这一关'; }
+        Game.log($('simonLog'), '第 ' + this.seq.length + ' 关按错');
+        this.input = [];
+        this.playback();
+        return;
+      }
+      if (this.input.length === this.seq.length) {
+        this.level = this.seq.length;
+        const r = $('simonResult');
+        if (r) { r.className = 'game-result win'; r.textContent = '✅ 通过第 ' + this.level + ' 关'; }
+        Game.log($('simonLog'), '通过第 ' + this.level + ' 关');
+        if (this.level >= 6) { r.textContent = '🏆 通关！记忆大师'; Game.reward(); }
+        setTimeout(() => { if (Game.active) this.next(); }, 700);
+      }
+    },
+  },
 };
 
 /* =====================================================================
@@ -3333,22 +3909,94 @@ const DGL = {
             _ai: { segStart: 0, segDur: 2, fromAmp: 0.4, toAmp: 0.4, fromFreq: 30, toFreq: 30, shape: 'wave', spike: 0, spikeDur: 0.3 } },
   frames: [], tickTimer: null, strengthAt: 0, reqN: 0, t0: 0,
 
+  // 规范化中继地址：允许省略协议 / 末尾斜杠
+  normalizeUrl(raw) {
+    let u = String(raw || '').trim();
+    if (!u) u = this.relay;
+    if (!/^wss?:\/\//i.test(u)) {
+      u = (/^[\w.-]+(:\d+)?(\/.*)?$/.test(u) ? 'wss://' + u : 'wss://' + u.replace(/^\/+/, ''));
+    }
+    return u.replace(/\/+$/, '');
+  },
+
   connect() {
-    const url = (($('dglUrl') && $('dglUrl').value) || '').trim() || this.relay;
-    if (!/^wss?:\/\//i.test(url)) { toast('地址需以 wss:// 开头', 'warn'); return; }
+    const url = this.normalizeUrl($('dglUrl') && $('dglUrl').value);
     this.relay = url;
+    if ($('dglUrl')) $('dglUrl').value = url;
     this.disconnect(true);
-    this.phase = 'connecting'; this.render();
+    this.phase = 'connecting'; this._opened = false; this.render();
     let ws;
-    try { ws = new WebSocket(url); } catch (e) { this.phase = 'idle'; this.render(); toast('无法创建连接：' + e.message, 'err'); return; }
+    try { ws = new WebSocket(url); }
+    catch (e) {
+      this.phase = 'idle'; this.render();
+      toast('无法创建连接（地址无效）：' + (e && e.message ? e.message : e), 'err', 6000);
+      return;
+    }
     this.ws = ws;
-    ws.onopen = () => { this.render(); };
+    this._connTimer = setTimeout(() => {
+      if (!this._opened && this.phase !== 'idle') {
+        try { ws.close(); } catch (e) {}
+        this.phase = 'idle'; this.render();
+        toast('连接超时：连不上 ' + url + '。请检查网络能否访问该地址（手机流量/WiFi 都可能拦截），或换一个中继地址。', 'err', 9000);
+      }
+    }, 12000);
+    ws.onopen = () => {
+      this._opened = true;
+      clearTimeout(this._connTimer);
+      this.render();
+    };
     ws.onmessage = (e) => this.onMsg(e.data);
     ws.onclose = (e) => {
-      const why = e && e.code === 4000 ? '控制方已断开' : e && e.code === 4001 ? '目标不存在' : e && e.code === 4002 ? '空闲超时' : '连接已断开';
-      this.onClose(why);
+      clearTimeout(this._connTimer);
+      const manual = this._manual, opened = this._opened;
+      this._manual = false;
+      const code = e && e.code ? e.code : 0;
+      let why = code === 4000 ? '控制方已断开' : code === 4001 ? '配对目标不存在' : code === 4002 ? '空闲超时（5 分钟无人接入）' : (code ? '连接已关闭（代码 ' + code + '）' : '连接已断开');
+      if (!opened) why = '连不上中继 ' + url + (code ? '（代码 ' + code + '）' : '') + '：请检查手机网络能否访问该地址';
+      this.onClose(why, manual);
     };
     ws.onerror = () => {};
+  },
+
+  // 逐条探测候选中继，把结果展示在卡片里（手机端故障排查用）
+  async diagnose() {
+    const box = $('dglDiag');
+    if (!box) return;
+    box.style.display = 'block';
+    box.innerHTML = '正在探测…';
+    const list = Array.from(new Set([
+      this.normalizeUrl($('dglUrl') && $('dglUrl').value),
+      'wss://trex.dungeon-lab.cn/v4',
+      'wss://trex.dungeon-lab.cn/v4/',
+    ]));
+    const lines = [];
+    for (const url of list) {
+      const r = await this.probe(url);
+      lines.push((r.ok ? '✅ ' : '❌ ') + url + ' — ' + r.msg);
+      box.innerHTML = lines.join('<br>') + '<br>探测中…';
+    }
+    box.innerHTML = lines.join('<br>');
+  },
+
+  probe(url) {
+    return new Promise((resolve) => {
+      let done = false, ws;
+      const finish = (ok, msg) => {
+        if (done) return;
+        done = true;
+        try { ws && ws.close(); } catch (e) {}
+        resolve({ ok, msg });
+      };
+      try { ws = new WebSocket(url); } catch (e) { resolve({ ok: false, msg: '地址无效' }); return; }
+      const t = setTimeout(() => finish(false, '超时 12s'), 12000);
+      ws.onopen = () => {
+        clearTimeout(t);
+        setTimeout(() => finish(true, '已连接'), 900);
+      };
+      ws.onmessage = () => { clearTimeout(t); finish(true, '已连接并收到数据'); };
+      ws.onclose = (e) => { clearTimeout(t); finish(false, '关闭代码 ' + (e.code || 0)); };
+      ws.onerror = () => { clearTimeout(t); finish(false, '网络错误'); };
+    });
   },
 
   disconnect(silent) {
@@ -3361,8 +4009,8 @@ const DGL = {
     if (!silent) this.render();
   },
 
-  onClose(why) {
-    const manual = this._manual;
+  onClose(why, manual) {
+    manual = manual === undefined ? this._manual : manual;
     this._manual = false;
     this.stopEngine();
     const wasPaired = this.phase === 'paired';
@@ -3465,9 +4113,16 @@ const DGL = {
     this.rpc('device.op', data);
   },
 
+  // 官方 App 模式下的设备类型 → 使用对应设备的通道上限
+  devKind() {
+    const t = (this.sel && (this.sel.type || '')) || '';
+    return /COYOTE|郊狼/i.test(t) ? 'coyote' : 'possum';
+  },
+
   setTarget(ch, v) {
-    const capped = clamp(v, 0, getCap());
-    if (capped !== v) toast('已限制在全局强度上限 ' + getCap(), 'warn');
+    const cap = capFor(this.devKind(), ch === 'a' ? 'A' : 'B');
+    const capped = clamp(v, 0, cap);
+    if (capped !== v) toast('该通道上限 ' + cap, 'warn');
     this.target[ch] = capped;
     this.render();
     buzz(8);
@@ -3484,9 +4139,11 @@ const DGL = {
 
   tick() {
     if (this.phase !== 'paired' || !this.sel) return;
+    const kind = this.devKind();
+    const capA = capFor(kind, 'A'), capB = capFor(kind, 'B');
     const step = 200 / Math.max(1, Math.round(getRamp() * 10));
-    this.applied.a = moveToward(this.applied.a, this.target.a, step, 100);
-    this.applied.b = moveToward(this.applied.b, this.target.b, step, 100);
+    this.applied.a = Math.min(moveToward(this.applied.a, this.target.a, step, 100), capA);
+    this.applied.b = Math.min(moveToward(this.applied.b, this.target.b, step, 100), capB);
     const t = performance.now() / 1000 - this.t0;
     const aVals = [], bVals = [];
     for (let i = 0; i < 4; i++) {
@@ -3598,10 +4255,35 @@ const DGL = {
 
 /* ---------- 设置持久化 ---------- */
 const SETTINGS_KEY = 'dglab.ctrl.v1';
+const CAP_IDS = [
+  ['coyote', 'A', 'capCA', 'capCAv'],
+  ['coyote', 'B', 'capCB', 'capCBv'],
+  ['possum', 'A', 'capPA', 'capPAv'],
+  ['possum', 'B', 'capPB', 'capPBv'],
+];
+function syncCapUI() {
+  const vals = [];
+  CAP_IDS.forEach(([dev, ch, sid, vid]) => {
+    const v = clamp(Math.round(capFor(dev, ch)), 0, 200);
+    CH_CAPS[dev][ch] = v;
+    const el = $(sid), lb = $(vid);
+    if (el) { el.value = v; paintSlider(el); }
+    if (lb) lb.textContent = v;
+    vals.push(v);
+  });
+  const sum = $('capSum');
+  if (sum) sum.textContent = `郊狼 ${vals[0]}/${vals[1]} · 负鼠 ${vals[2]}/${vals[3]}`;
+  Object.values(DEVICES).forEach(d => { if (d) d.syncUI(); });
+}
 function loadSettings() {
   try {
     const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
-    $('capSlider').value = clamp(s.cap || 100, 10, 200);
+    const c = s.caps || {};
+    CH_CAPS.coyote.A = clamp(c.coyoteA != null ? c.coyoteA : (s.cap != null ? s.cap : 100), 0, 200);
+    CH_CAPS.coyote.B = clamp(c.coyoteB != null ? c.coyoteB : (s.cap != null ? s.cap : 100), 0, 200);
+    CH_CAPS.possum.A = clamp(c.possumA != null ? c.possumA : (s.cap != null ? s.cap : 100), 0, 200);
+    CH_CAPS.possum.B = clamp(c.possumB != null ? c.possumB : (s.cap != null ? s.cap : 100), 0, 200);
+    syncCapUI();
     $('rampSlider').value = clamp(s.ramp || 1.2, 0.3, 5);
     $('timerMin').value = clamp(s.timerMin || 10, 1, 120);
     Object.values(DEVICES).forEach(d => {
@@ -3620,7 +4302,11 @@ function loadSettings() {
   } catch (e) {}
 }
 function saveSettings() {
-  const s = { cap: +$('capSlider').value, ramp: +$('rampSlider').value, timerMin: parseInt($('timerMin').value, 10) || 10 };
+  const s = {
+    caps: { coyoteA: CH_CAPS.coyote.A, coyoteB: CH_CAPS.coyote.B, possumA: CH_CAPS.possum.A, possumB: CH_CAPS.possum.B },
+    ramp: +$('rampSlider').value,
+    timerMin: parseInt($('timerMin').value, 10) || 10,
+  };
   Object.values(DEVICES).forEach(d => {
     if (d) s[d.kind] = { freq: d.freq, period: d.period, bpm: d.bpm, ledColor: d.ledColor, fb: d.fb, ib: d.ib, pattern: d.pattern };
   });
@@ -3660,19 +4346,35 @@ window.addEventListener('DOMContentLoaded', () => {
     buzz(10);
   });
 
-  $('capSlider').addEventListener('input', (e) => {
-    $('capVal').textContent = e.target.value;
-    paintSlider(e.target);
-    let clamped = false;
-    Object.values(DEVICES).forEach(d => {
-      if (!d) return;
-      if (d.strengthA > +e.target.value) { d.strengthA = +e.target.value; clamped = true; }
-      if (d.strengthB > +e.target.value) { d.strengthB = +e.target.value; clamped = true; }
-      d.sendSettings();
-      d.syncUI();
+  // 每通道独立上限：4 条滑块
+  CAP_IDS.forEach(([dev, ch, sid, vid]) => {
+    const el = $(sid);
+    if (!el) return;
+    el.addEventListener('input', (e) => {
+      const v = +e.target.value;
+      CH_CAPS[dev][ch] = v;
+      const lb = $(vid);
+      if (lb) lb.textContent = v;
+      paintSlider(e.target);
+      const sum = $('capSum');
+      if (sum) sum.textContent = `郊狼 ${CH_CAPS.coyote.A}/${CH_CAPS.coyote.B} · 负鼠 ${CH_CAPS.possum.A}/${CH_CAPS.possum.B}`;
+      // 收低受影响通道的当前强度，并给郊狼写硬件上限
+      let clamped = false;
+      Object.values(DEVICES).forEach(d => {
+        if (!d) return;
+        if (d.kind === dev) {
+          if (ch === 'A' && d.strengthA > v) { d.strengthA = v; clamped = true; }
+          if (ch === 'B' && d.strengthB > v) { d.strengthB = v; clamped = true; }
+        }
+        if (d.kind === 'coyote' && d.connected) d.sendSettings();
+        d.syncUI();
+      });
+      if (DGL.phase === 'paired' && DGL.devKind() === dev && DGL.target[ch.toLowerCase()] > v) {
+        DGL.target[ch.toLowerCase()] = v; DGL.render();
+      }
+      if (clamped) toast(`${dev === 'coyote' ? '郊狼' : '负鼠'} ${ch} 通道已按新上限收低`, 'warn');
+      saveSettings();
     });
-    if (clamped) toast('已按新的上限收低当前强度', 'warn');
-    saveSettings();
   });
   $('rampSlider').addEventListener('input', (e) => {
     $('rampVal').textContent = (+e.target.value).toFixed(1) + ' 秒';
@@ -3778,6 +4480,27 @@ window.addEventListener('DOMContentLoaded', () => {
     el.addEventListener('click', () => Game.start(el.dataset.game)));
   paintSlider($('gameBase'));
 
+  /* ---------- AI 智控 ---------- */
+  $('aiLo').addEventListener('input', (e) => { AI.lo = +e.target.value; AI.clampRange(); });
+  $('aiHi').addEventListener('input', (e) => { AI.hi = +e.target.value; AI.clampRange(); });
+  $('aiTargets').querySelectorAll('button').forEach(el =>
+    el.addEventListener('click', () => {
+      const k = el.dataset.at;
+      AI.targets[k] = !AI.targets[k];
+      el.classList.toggle('sel', AI.targets[k]);
+    }));
+  $('aiStyles').querySelectorAll('button').forEach(el =>
+    el.addEventListener('click', () => {
+      AI.style = el.dataset.style;
+      $('aiStyles').querySelectorAll('button').forEach(b => b.classList.toggle('sel', b === el));
+    }));
+  $('aiStart').addEventListener('click', () => AI.start());
+  $('aiPause').addEventListener('click', () => AI.pause());
+  $('aiStop').addEventListener('click', () => AI.stop());
+  $('aiFeedback').querySelectorAll('button').forEach(el =>
+    el.addEventListener('click', () => AI.feedback(el.dataset.fb)));
+  paintSlider($('aiLo')); paintSlider($('aiHi'));
+
   /* ---------- 标签页 / 场景 / 统计 ---------- */
   document.querySelectorAll('#tabbar .tab').forEach(b =>
     b.addEventListener('click', () => { location.hash = '#' + b.dataset.tab; }));
@@ -3799,6 +4522,20 @@ window.addEventListener('DOMContentLoaded', () => {
     if (DGL.phase !== 'idle') { DGL.disconnect(); toast('已断开官方 App 连接'); return; }
     DGL.connect();
   });
+  $('dglDiagBtn').addEventListener('click', () => DGL.diagnose());
+  // 静态托管时提示远程控制需要外接中继
+  (() => {
+    const host = location.hostname || '';
+    const isStatic = /github\.io$|pages\.dev$|netlify\.app$|vercel\.app$|gitlab\.io$|gitee\.io$/i.test(host);
+    const hint = $('remoteHint');
+    if (hint) {
+      hint.textContent = isStatic
+        ? '当前是静态托管（无内置中继）：远程控制需在下方填电脑 start.bat 给出的地址（如 wss://192.168.1.5:8080/ws）；或改用「官方 App（WebSocket）」模式跨设备控制。'
+        : '中继地址留空 = 本页所在服务器（自动 /ws）。';
+    }
+    const relay = $('remoteRelay');
+    if (relay && isStatic) relay.placeholder = '填 wss://电脑IP:端口/ws';
+  })();
   $('dglA').addEventListener('input', (e) => DGL.setTarget('a', +e.target.value));
   $('dglB').addEventListener('input', (e) => DGL.setTarget('b', +e.target.value));
   $('dglPeriod').addEventListener('input', (e) => {
@@ -3829,11 +4566,11 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   // 初始绘制
-  paintSlider($('capSlider')); paintSlider($('rampSlider'));
+  paintSlider($('rampSlider'));
   paintSlider($('remoteSliderA')); paintSlider($('remoteSliderB'));
   paintSlider($('remoteFreq')); paintSlider($('remotePeriod'));
   paintSlider($('scriptDur')); paintSlider($('scriptPeak'));
-  $('capVal').textContent = $('capSlider').value;
+  syncCapUI();
   $('rampVal').textContent = (+$('rampSlider').value).toFixed(1) + ' 秒';
 });
 </script>
