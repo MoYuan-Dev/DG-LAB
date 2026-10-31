@@ -584,6 +584,19 @@ input[type=range]:active::-webkit-slider-thumb{ box-shadow:0 0 22px var(--fill,#
 .pat, .game-menu button, .scenes-grid button, .steps button, .script-btns button{ transition:transform .12s, background .18s, border-color .18s, box-shadow .18s; }
 .steps button:hover{ background:rgba(255,255,255,.09); }
 
+/* ===== 音乐驱动 ===== */
+.music-src, .music-map{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.music-src button, .music-map button{ padding:11px 4px; border-radius:11px; border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--dim); font-size:12.5px; font-weight:700; }
+.music-src button.sel, .music-map button.sel{ color:#fff; border-color:rgba(139,108,255,.75); background:rgba(139,108,255,.18); }
+.file-btn{ display:inline-flex; align-items:center; gap:6px; padding:9px 12px; border-radius:11px; border:1px solid var(--line); background:rgba(255,255,255,.06); font-size:12.5px; color:var(--text); cursor:pointer; flex:none; }
+.music-name{ font-size:11.5px; color:var(--dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.mus-meter-wrap{ margin-top:12px; }
+.mus-meter{ position:relative; height:10px; border-radius:5px; background:rgba(255,255,255,.08); overflow:hidden; }
+.mus-level{ position:absolute; left:0; top:0; bottom:0; width:0%; border-radius:5px; background:linear-gradient(90deg,#27d3e6,#8b6cff); transition:width .08s linear; }
+.mus-beat{ position:absolute; inset:0; background:rgba(255,194,75,.5); opacity:0; transition:opacity .08s; }
+.mus-beat.on{ opacity:1; }
+.mus-info{ font-size:11px; color:var(--dim2); margin-top:6px; min-height:14px; }
+
 /* ===== 提示 / 页脚 ===== */
 #toasts{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:100; display:flex; flex-direction:column; gap:8px; width:min(92vw,420px); pointer-events:none; }
 .toast{
@@ -914,6 +927,44 @@ footer b{ color:var(--dim); }
       <button data-scene="wild"><span class="sc-ic"><svg class="ic"><use href="#i-bolt"/></svg></span>强劲<small>智能随机 · 高</small></button>
     </div>
     <div class="scene-note">场景强度自动钳制在全局上限内；请确认自身耐受后使用。</div>
+  </section>
+
+  <section class="card" id="musicCard">
+    <h2><svg class="ic"><use href="#i-metronome"/></svg> 音乐驱动<span class="sub">音频文件 / 麦克风拾音，实时驱动强度</span></h2>
+    <div class="music-src" id="musicSrc">
+      <button data-src="file" class="sel">音频文件</button>
+      <button data-src="mic">麦克风拾音</button>
+    </div>
+    <div class="remote-line" style="margin-top:8px">
+      <label class="file-btn" for="musicFile"><svg class="ic"><use href="#i-save"/></svg> 选择音频文件</label>
+      <input type="file" id="musicFile" accept="audio/*" style="display:none">
+      <span id="musicName" class="music-name">未选择文件</span>
+    </div>
+    <div class="remote-line" style="margin-top:8px">
+      <button class="dbtn" id="musicPlay" style="flex:1;padding:10px">播放</button>
+      <button class="dbtn" id="musicStop" style="flex:1;padding:10px">停止</button>
+    </div>
+    <div class="slider-label"><span>强度下限</span><b id="musLoV">20</b></div>
+    <input type="range" id="musLo" min="0" max="200" step="5" value="20">
+    <div class="slider-label"><span>强度上限</span><b id="musHiV">90</b></div>
+    <input type="range" id="musHi" min="0" max="200" step="5" value="90">
+    <div class="slider-label"><span>灵敏度</span><b id="musGainV">1.6</b></div>
+    <input type="range" id="musGain" min="0.5" max="4" step="0.1" value="1.6">
+    <div class="music-map" id="musicMap">
+      <button data-map="follow" class="sel">平滑跟随</button>
+      <button data-map="beat">节拍脉冲</button>
+    </div>
+    <div class="ch-targets" id="musicTargets">
+      <button data-mt="coyoteA" class="sel">郊狼 A</button>
+      <button data-mt="coyoteB" class="sel">郊狼 B</button>
+      <button data-mt="possumA">负鼠 A</button>
+      <button data-mt="possumB">负鼠 B</button>
+    </div>
+    <div class="mus-meter-wrap">
+      <div class="mus-meter"><div class="mus-level" id="musLevel"></div><div class="mus-beat" id="musBeat"></div></div>
+      <div class="mus-info" id="musInfo">等待音频…</div>
+    </div>
+    <div class="scene-note">「麦克风拾音」= 手机麦克风听到的**扬声器声音**（App 播放的音乐/音效）。戴耳机会听不到；请把音量开大一点，并注意别开外放太吵。</div>
   </section>
 
   <section class="card" id="scriptCard">
@@ -2025,6 +2076,7 @@ function emergencyStop() {
   Script.stop(false);
   if (typeof Game !== 'undefined') Game.end();
   if (typeof AI !== 'undefined' && AI.active) AI.stop();
+  if (typeof MusicDrive !== 'undefined' && MusicDrive.playing) MusicDrive.stop(true);
   if (typeof DGL !== 'undefined') DGL.zero();
   savedForRestore = null;
   let stopped = false;
@@ -2734,6 +2786,154 @@ function renderPresets() {
   box.querySelectorAll('[data-del]').forEach(el =>
     el.addEventListener('click', () => deletePreset(el.dataset.del)));
 }
+
+/* =====================================================================
+ * 音乐驱动：音频文件 / 麦克风拾音 → 实时强度
+ * 说明：网页无法抓取其他 App 的音频流（iOS 沙箱限制），
+ *       「麦克风拾音」= 用麦克风听到扬声器放出来的声音（App 的音乐/音效）
+ * ===================================================================== */
+const MusicDrive = {
+  ctx: null, analyser: null, node: null, audio: null, stream: null,
+  source: 'file', mapping: 'follow',
+  playing: false, lo: 20, hi: 90, gain: 1.6,
+  targets: { coyoteA: true, coyoteB: true, possumA: false, possumB: false },
+  level: 0, bassAvg: 0.12, beatAt: 0, beatEnv: 0,
+  timer: null, bufTime: null, bufFreq: null,
+
+  parse(k) { return { dev: k.startsWith('coyote') ? 'coyote' : 'possum', ch: k.endsWith('A') ? 'A' : 'B' }; },
+  list() { return Object.keys(this.targets).filter(k => this.targets[k]); },
+
+  async ensureCtx() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) throw new Error('浏览器不支持 Web Audio');
+      this.ctx = new AC();
+      this.analyser = this.ctx.createAnalyser();
+      this.analyser.fftSize = 1024;
+      this.analyser.smoothingTimeConstant = 0.6;
+      this.bufTime = new Uint8Array(this.analyser.fftSize);
+      this.bufFreq = new Uint8Array(this.analyser.frequencyBinCount);
+    }
+    if (this.ctx.state === 'suspended') { try { await this.ctx.resume(); } catch (e) {} }
+    return this.ctx;
+  },
+
+  async play() {
+    if (this.playing) return;
+    if (!this.list().length) { toast('请先选择至少一个受控通道', 'warn'); return; }
+    let ctx;
+    try { ctx = await this.ensureCtx(); }
+    catch (e) { toast('音频初始化失败：' + (e.message || e), 'err'); return; }
+
+    try {
+      // 断开上一次的节点
+      if (this.node) { try { this.node.disconnect(); } catch (e) {} this.node = null; }
+      if (this.audio) { try { this.audio.pause(); } catch (e) {} this.audio = null; }
+      if (this.stream) { try { this.stream.getTracks().forEach(t => t.stop()); } catch (e) {} this.stream = null; }
+
+      if (this.source === 'mic') {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          toast('此浏览器不支持麦克风采集（iPhone 请用 Bluefy 或 Safari）', 'err', 5000);
+          return;
+        }
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+        });
+        this.node = ctx.createMediaStreamSource(this.stream);
+        this.node.connect(this.analyser);          // 不回连扬声器，避免啸叫
+      } else {
+        const file = $('musicFile') && $('musicFile').files && $('musicFile').files[0];
+        if (!file) { toast('请先选择一个音频文件', 'warn'); return; }
+        this.audio = new Audio(URL.createObjectURL(file));
+        this.audio.loop = true;
+        this.audio.volume = 1;
+        this.node = ctx.createMediaElementSource(this.audio);
+        this.node.connect(this.analyser);
+        this.analyser.connect(ctx.destination);    // 文件模式：正常出声
+        await this.audio.play().catch(e => { throw new Error('播放被拒绝：' + e.message); });
+      }
+      this.playing = true;
+      this.beatEnv = 0; this.level = 0; this.bassAvg = 0.12;
+      clearInterval(this.timer);
+      this.timer = setInterval(() => this.tick(), 100);
+      const pb = $('musicPlay');
+      if (pb) pb.textContent = '播放中…';
+      toast(this.source === 'mic' ? '麦克风拾音已开始（把 App 声音外放）' : '音乐驱动已开始', 'ok');
+    } catch (e) {
+      toast('启动失败：' + (e.message || e), 'err', 6000);
+      this.stop(true);
+    }
+  },
+
+  stop(silent) {
+    this.playing = false;
+    clearInterval(this.timer); this.timer = null;
+    if (this.audio) { try { this.audio.pause(); } catch (e) {} this.audio = null; }
+    if (this.stream) { try { this.stream.getTracks().forEach(t => t.stop()); } catch (e) {} this.stream = null; }
+    if (this.node) { try { this.node.disconnect(); } catch (e) {} this.node = null; }
+    if (this.analyser) { try { this.analyser.disconnect(); } catch (e) {} }
+    const pb = $('musicPlay'); if (pb) pb.textContent = '播放';
+    const lv = $('musLevel'); if (lv) lv.style.width = '0%';
+    const bi = $('musBeat'); if (bi) bi.classList.remove('on');
+    const info = $('musInfo'); if (info) info.textContent = '已停止';
+    // 归零受控通道
+    this.list().forEach(k => {
+      const { dev, ch } = this.parse(k);
+      const d = DEVICES[dev];
+      if (d) d.setTarget(ch, 0, true);
+    });
+    if (!silent) toast('音乐驱动已停止，输出归零', 'warn');
+  },
+
+  tick() {
+    if (!this.playing || !this.analyser) return;
+    this.analyser.getByteTimeDomainData(this.bufTime);
+    let sum = 0;
+    for (let i = 0; i < this.bufTime.length; i++) {
+      const v = (this.bufTime[i] - 128) / 128;
+      sum += v * v;
+    }
+    const rms = Math.sqrt(sum / this.bufTime.length);
+    this.analyser.getByteFrequencyData(this.bufFreq);
+    const n = Math.min(12, this.bufFreq.length);
+    let bass = 0;
+    for (let i = 0; i < n; i++) bass += this.bufFreq[i];
+    bass = bass / (n * 255);
+
+    // 自适应节拍检测
+    this.bassAvg = this.bassAvg * 0.96 + bass * 0.04;
+    const thr = Math.max(0.05, this.bassAvg * 1.45);
+    if (bass > thr && performance.now() - this.beatAt > 200) {
+      this.beatAt = performance.now();
+      this.beatEnv = 1;
+    }
+    this.beatEnv *= 0.86;
+    const raw = clamp(rms * 3.4 * this.gain, 0, 1);
+    this.level = this.level * 0.62 + raw * 0.38;
+
+    const lv = this.mapping === 'beat' ? clamp(this.beatEnv * 1.2, 0, 1) : this.level;
+    const out = Math.round(this.lo + (this.hi - this.lo) * lv);
+    this.list().forEach(k => {
+      const { dev, ch } = this.parse(k);
+      const d = DEVICES[dev];
+      if (d && d.connected) d.setTarget(ch, Math.min(out, capFor(dev, ch)), true);
+    });
+    this.render(lv);
+  },
+
+  render(lv) {
+    const bar = $('musLevel'), beat = $('musBeat'), info = $('musInfo');
+    if (bar) bar.style.width = (clamp(lv, 0, 1) * 100).toFixed(0) + '%';
+    if (beat) {
+      const on = this.beatEnv > 0.5;
+      beat.classList.toggle('on', on);
+    }
+    if (info) {
+      const out = Math.round(this.lo + (this.hi - this.lo) * clamp(lv, 0, 1));
+      info.textContent = `电平 ${(clamp(this.level, 0, 1) * 100).toFixed(0)}% · 目标强度 ${out} · ${this.mapping === 'beat' ? '节拍模式' : '跟随模式'}`;
+    }
+  },
+};
 
 /* =====================================================================
  * AI 智控：按目标区间自动「升温 / 维持 / 挑逗 / 冲击」，并根据感受反馈自适应
@@ -5061,6 +5261,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     if (typeof AI !== 'undefined') { AI.hi = Math.min(AI.hi, v); AI.clampRange(); }
     if (typeof Script !== 'undefined') Script.peak = Math.min(Script.peak, v);
+    if (typeof MusicDrive !== 'undefined') { MusicDrive.hi = Math.min(MusicDrive.hi, v); const mh = $('musHi'); if (mh) { mh.value = MusicDrive.hi; $('musHiV').textContent = MusicDrive.hi; paintSlider(mh); } }
     if (clamped) toast('已按新的安全上限收低当前强度', 'warn');
     saveSettings();
   });
@@ -5168,6 +5369,53 @@ window.addEventListener('DOMContentLoaded', () => {
     el.addEventListener('click', () => Game.start(el.dataset.game)));
   paintSlider($('gameBase'));
 
+  /* ---------- 音乐驱动 ---------- */
+  $('musicSrc').querySelectorAll('button').forEach(el =>
+    el.addEventListener('click', () => {
+      MusicDrive.source = el.dataset.src;
+      $('musicSrc').querySelectorAll('button').forEach(b => b.classList.toggle('sel', b === el));
+      if (MusicDrive.playing) { MusicDrive.stop(true); toast('已切换音源，请重新点播放', 'info'); }
+      toast(el.dataset.src === 'mic'
+        ? '麦克风拾音：把 App/音乐外放出来，页面用麦克风听'
+        : '音频文件：选择本地音乐文件，页面自己播放并分析', 'info', 4200);
+    }));
+  $('musicMap').querySelectorAll('button').forEach(el =>
+    el.addEventListener('click', () => {
+      MusicDrive.mapping = el.dataset.map;
+      $('musicMap').querySelectorAll('button').forEach(b => b.classList.toggle('sel', b === el));
+    }));
+  $('musicTargets').querySelectorAll('button').forEach(el =>
+    el.addEventListener('click', () => {
+      const k = el.dataset.mt;
+      MusicDrive.targets[k] = !MusicDrive.targets[k];
+      el.classList.toggle('sel', MusicDrive.targets[k]);
+    }));
+  $('musicFile').addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    const name = $('musicName');
+    if (name) name.textContent = f ? f.name : '未选择文件';
+  });
+  $('musicPlay').addEventListener('click', () => MusicDrive.play());
+  $('musicStop').addEventListener('click', () => MusicDrive.stop());
+  $('musLo').addEventListener('input', (e) => {
+    MusicDrive.lo = +e.target.value;
+    if (MusicDrive.lo > MusicDrive.hi) MusicDrive.hi = MusicDrive.lo;
+    $('musLoV').textContent = MusicDrive.lo; $('musHiV').textContent = MusicDrive.hi;
+    paintSlider(e.target); paintSlider($('musHi'));
+  });
+  $('musHi').addEventListener('input', (e) => {
+    MusicDrive.hi = +e.target.value;
+    if (MusicDrive.hi < MusicDrive.lo) MusicDrive.lo = MusicDrive.hi;
+    $('musLoV').textContent = MusicDrive.lo; $('musHiV').textContent = MusicDrive.hi;
+    paintSlider(e.target); paintSlider($('musLo'));
+  });
+  $('musGain').addEventListener('input', (e) => {
+    MusicDrive.gain = +e.target.value;
+    $('musGainV').textContent = (+e.target.value).toFixed(1);
+    paintSlider(e.target);
+  });
+  paintSlider($('musLo')); paintSlider($('musHi')); paintSlider($('musGain'));
+
   /* ---------- AI 智控 ---------- */
   $('aiLo').addEventListener('input', (e) => { AI.lo = +e.target.value; AI.clampRange(); });
   $('aiHi').addEventListener('input', (e) => { AI.hi = +e.target.value; AI.clampRange(); });
@@ -5256,6 +5504,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // 页面关闭前尽力归零
   window.addEventListener('beforeunload', () => {
     Remote.disconnect();
+    if (typeof MusicDrive !== 'undefined') { try { MusicDrive.stop(true); } catch (e) {} }
     if (typeof DGL !== 'undefined') { try { DGL.zero(); } catch (e) {} }
     Object.values(DEVICES).forEach(d => d && d.connected && d.ensureZero());
   });
