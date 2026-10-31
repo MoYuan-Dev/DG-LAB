@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -447,11 +447,32 @@ canvas{ display:block; width:100%; height:64px; }
 .wire.cut{ opacity:.25; text-decoration:line-through; pointer-events:none; }
 .mem-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:14px 0; }
 .mem-card{
-  aspect-ratio:3/4; border-radius:12px; border:1px solid var(--line); background:linear-gradient(160deg,rgba(139,108,255,.35),rgba(139,108,255,.12));
-  font-size:26px; display:grid; place-items:center; transition:transform .25s;
+  aspect-ratio:3/4; border-radius:12px; perspective:700px; position:relative; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
 }
-.mem-card.flip{ transform:rotateY(180deg); background:rgba(255,255,255,.08); }
-.mem-card.done{ opacity:.45; pointer-events:none; }
+.mem-inner{
+  position:absolute; inset:0; border-radius:12px; transform-style:preserve-3d;
+  transition:transform .42s cubic-bezier(.2,.8,.25,1);
+}
+.mem-card.flip .mem-inner{ transform:rotateY(180deg); }
+.mem-face{
+  position:absolute; inset:0; border-radius:12px; display:grid; place-items:center;
+  -webkit-backface-visibility:hidden; backface-visibility:hidden;
+  border:1px solid var(--line); font-weight:800;
+}
+.mem-back{
+  background:
+    radial-gradient(circle at 50% 35%, rgba(139,108,255,.35), rgba(139,108,255,.08) 70%),
+    rgba(255,255,255,.02);
+  color:rgba(255,255,255,.35); font-size:22px; letter-spacing:1px;
+}
+.mem-front{
+  transform:rotateY(180deg);
+  background:linear-gradient(160deg, rgba(255,255,255,.14), rgba(255,255,255,.04));
+  color:#fff; font-size:28px; text-shadow:0 0 18px rgba(139,108,255,.55);
+}
+.mem-card.done{ opacity:.4; pointer-events:none; }
+.mem-card.done .mem-front{ border-color:rgba(47,214,146,.5); box-shadow:0 0 14px rgba(47,214,146,.25) inset; }
 .bj-row{ display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin:6px 0; min-height:44px; }
 .bj-card{
   width:38px; height:54px; border-radius:8px; background:linear-gradient(160deg,#f5f6fa,#c9cde0);
@@ -468,6 +489,9 @@ canvas{ display:block; width:100%; height:64px; }
 .ai-styles button{ padding:12px 4px; border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--dim); font-size:13px; font-weight:700; }
 .ai-styles button.sel{ color:#fff; border-color:rgba(139,108,255,.75); background:rgba(139,108,255,.18); }
 .ai-status{ margin-top:10px; font-size:12px; color:var(--amber); min-height:18px; }
+.ai-progress{ height:5px; border-radius:3px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px; }
+.ai-progress-fill{ height:100%; width:0%; border-radius:3px; transition:width .45s linear; background:linear-gradient(90deg,#2fd692,#ffc24b); }
+.ai-meta{ margin-top:6px; font-size:10.5px; color:var(--dim2); min-height:14px; }
 .ai-feedback{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; }
 .ai-feedback button{ padding:11px 4px; border-radius:11px; border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--text); font-size:12.5px; font-weight:700; }
 .ai-feedback button:active{ transform:scale(.95); }
@@ -505,6 +529,45 @@ canvas{ display:block; width:100%; height:64px; }
 .tab .t-ic .ic{ width:19px; height:19px; }
 h2 .ic{ width:1.1em; height:1.1em; }
 .btn-ic{ display:inline-flex; align-items:center; gap:6px; justify-content:center; }
+
+/* ===== 数字记忆 / 节奏 / 颜色 ===== */
+.digit-show{ text-align:center; font-size:34px; font-weight:900; letter-spacing:6px; color:var(--dim); margin:16px 0 10px;
+  font-variant-numeric:tabular-nums; min-height:44px; transition:.2s; }
+.digit-show.on{ color:var(--text); text-shadow:0 0 22px rgba(139,108,255,.6); }
+.beat-bar{ height:8px; border-radius:4px; background:rgba(255,255,255,.09); overflow:hidden; margin:14px 0 8px; }
+.beat-fill{ height:100%; width:0%; border-radius:4px; background:linear-gradient(90deg,#8b6cff,#27d3e6); transition:width .08s; }
+.beat-fill.hit{ background:linear-gradient(90deg,#2fd692,#ffc24b); }
+.stroop-word{ text-align:center; font-size:46px; font-weight:900; margin:14px 0 4px; letter-spacing:4px; }
+.stroop-btns{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:10px 0; }
+.stroop-btns button{ padding:13px 4px; border-radius:11px; border:1px solid var(--line); background:rgba(255,255,255,.06); color:var(--text); font-size:14px; font-weight:800; }
+.stroop-btns button:active{ transform:scale(.95); }
+
+/* ===== UI 精修 ===== */
+.tab{ position:relative; transition:transform .15s, color .2s, background .2s; }
+.tab:active{ transform:scale(.95); }
+.tab.active::after{
+  content:""; position:absolute; top:3px; left:50%; transform:translateX(-50%);
+  width:20px; height:2px; border-radius:2px;
+  background:linear-gradient(90deg,#8b6cff,#27d3e6);
+  box-shadow:0 0 10px rgba(139,108,255,.75);
+}
+.card h2{ position:relative; padding-left:13px; }
+.card h2::before{
+  content:""; position:absolute; left:0; top:1px; bottom:1px; width:3px; border-radius:2px;
+  background:linear-gradient(180deg,#8b6cff,#27d3e6); opacity:.85;
+}
+.card{ transition:border-color .25s, box-shadow .25s; }
+@media (hover:hover){
+  .card:hover{ border-color:rgba(255,255,255,.16); box-shadow:0 8px 28px rgba(0,0,0,.25); }
+  .pat:hover, .game-menu button:hover{ border-color:rgba(139,108,255,.45); }
+}
+button:focus-visible, input:focus-visible{ outline:2px solid rgba(139,108,255,.85); outline-offset:2px; }
+.game-result{ min-height:24px; }
+.channel{ transition:border-color .2s, background .2s; }
+input[type=range]::-webkit-slider-thumb{ transition:box-shadow .15s; }
+input[type=range]:active::-webkit-slider-thumb{ box-shadow:0 0 22px var(--fill,#8b6cff), 0 0 0 6px rgba(139,108,255,.18); }
+.pat, .game-menu button, .scenes-grid button, .steps button, .script-btns button{ transition:transform .12s, background .18s, border-color .18s, box-shadow .18s; }
+.steps button:hover{ background:rgba(255,255,255,.09); }
 
 /* ===== 提示 / 页脚 ===== */
 #toasts{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:100; display:flex; flex-direction:column; gap:8px; width:min(92vw,420px); pointer-events:none; }
@@ -571,6 +634,7 @@ footer b{ color:var(--dim); }
 <symbol id="i-paw" viewBox="0 0 24 24"><circle cx="7.5" cy="9" r="2"/><circle cx="12" cy="7" r="2"/><circle cx="16.5" cy="9" r="2"/><path d="M12 12.5c-3 0-5 2-5 4.2 0 1.4 1 2.3 2.4 2.3h5.2c1.4 0 2.4-.9 2.4-2.3 0-2.2-2-4.2-5-4.2Z"/></symbol>
 <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6 18 18M18 6l-1.4 1.4M7.4 16.6 6 18"/></symbol>
 <symbol id="i-spiral" viewBox="0 0 24 24"><path d="M12 12a2 2 0 1 0 2-2 4 4 0 1 0-4 4 6 6 0 1 0 6-6 8 8 0 1 0-8 8"/></symbol>
+<symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 2-.8 2-1.8 0-1.6-1.8-1.8-1.8-3.2 0-1 .8-1.8 1.8-1.8h1.6a4.4 4.4 0 0 0 4.4-4.4C20.5 6 16.7 3.5 12 3.5Z"/><path d="M8 10h.01M11 7.5h.01M14.5 8.5h.01M7.5 14h.01"/></symbol>
 </defs></svg>
 
 <header id="topbar">
@@ -796,6 +860,8 @@ footer b{ color:var(--dim); }
       <button data-style="intense"><svg class="ic"><use href="#i-flame"/></svg> 激烈</button>
     </div>
     <div class="ai-status" id="aiStatus">未启动 —— 先连接设备，再点「启动 AI」</div>
+    <div class="ai-progress"><div class="ai-progress-fill" id="aiProg"></div></div>
+    <div class="ai-meta" id="aiMeta"></div>
     <div class="wave-box" style="margin-top:10px">
       <div class="wave-legend">
         <span><i style="background:#27d3e6"></i>A 输出</span>
@@ -898,6 +964,9 @@ footer b{ color:var(--dim); }
       <button data-game="darts"><span class="g-ic"><svg class="ic"><use href="#i-target"/></svg></span>飞镖<span style="font-size:10px;color:var(--dim);font-weight:400">停准靶心，脱靶就罚</span></button>
       <button data-game="stopwatch"><span class="g-ic"><svg class="ic"><use href="#i-timer"/></svg></span>精准停表<span style="font-size:10px;color:var(--dim);font-weight:400">默数 5 秒，误差大连罚</span></button>
       <button data-game="math"><span class="g-ic"><svg class="ic"><use href="#i-calc"/></svg></span>心算<span style="font-size:10px;color:var(--dim);font-weight:400">10 秒答对，错/超时受罚</span></button>
+      <button data-game="digit"><span class="g-ic"><svg class="ic"><use href="#i-brain"/></svg></span>数字记忆<span style="font-size:10px;color:var(--dim);font-weight:400">位数递增，错一位就罚</span></button>
+      <button data-game="rhythm"><span class="g-ic"><svg class="ic"><use href="#i-metronome"/></svg></span>节奏敲击<span style="font-size:10px;color:var(--dim);font-weight:400">跟拍敲 16 下，飘了受罚</span></button>
+      <button data-game="stroop"><span class="g-ic"><svg class="ic"><use href="#i-palette"/></svg></span>颜色判断<span style="font-size:10px;color:var(--dim);font-weight:400">选字的颜色，4 秒一题</span></button>
     </div>
     <div id="gameArea"></div>
   </section>
@@ -2654,6 +2723,7 @@ const AI = {
   lo: 30, hi: 90, bias: 0,
   targets: { coyoteA: true, coyoteB: true, possumA: false, possumB: false },
   phase: 'idle', phaseEnd: 0, timer: null, switchAt: 0,
+  phaseDur: 0, startedAt: 0, peak: 0, switches: 0, highCount: 0, smooth: null,
   PATTERNS_BY_STYLE: {
     soft:     ['wave', 'breath', 'tide', 'vortex', 'constant'],
     balanced: ['wave', 'breath', 'stairs', 'double', 'tide', 'random'],
@@ -2683,10 +2753,10 @@ const AI = {
 
   nextPhase() {
     const cfg = this.STYLE_CFG[this.style] || this.STYLE_CFG.balanced;
-    const now = performance.now();
     const dur = (this.phase === 'hold' ? cfg.hold : this.phase === 'tease' ? cfg.tease : cfg.punch);
     const span = dur[1] - dur[0];
-    this.phaseEnd = now + (dur[0] + Math.random() * span) * 1000;
+    this.phaseDur = (dur[0] + Math.random() * span) * 1000;
+    this.phaseEnd = performance.now() + this.phaseDur;
   },
 
   step() {
@@ -2714,13 +2784,20 @@ const AI = {
       target = mid + drift + this.bias * 8;
     }
     target = clamp(target, 0, this.hi);
+    // 反馈偏移缓慢衰减回中性（避免越调越偏）
+    this.bias *= 0.985;
+    // 平滑：避免每秒硬跳，手感更顺
+    this.smooth = this.smooth == null ? target : this.smooth + (target - this.smooth) * 0.55;
+    const jitter = this.style === 'intense' ? 0.06 : 0.03;
     // 应用（逐通道上限由 setTarget 内部处理）
     this.list().forEach(k => {
       const { dev, ch } = this.parse(k);
       const d = DEVICES[dev];
       if (!d || !d.connected) return;
       const cap = capFor(dev, ch);
-      d.setTarget(ch, clamp(Math.round(target * (0.9 + Math.random() * 0.2)), 0, Math.min(cap, this.hi)), true);
+      const out = clamp(Math.round(this.smooth * (1 - jitter + Math.random() * jitter * 2)), 0, Math.min(cap, this.hi));
+      if (out > this.peak) this.peak = out;
+      d.setTarget(ch, out, true);
     });
     // 每隔一段时间自动换波形
     if (now >= this.switchAt) {
@@ -2732,6 +2809,7 @@ const AI = {
         if (d && d.connected) { d.pattern = p; d.syncUI(); }
       });
       this.switchAt = now + (9000 + Math.random() * 9000);
+      this.switches++;
       this.log('自动切换波形：' + (PATTERNS.find(x => x.id === p) || {}).name);
     }
     this.renderStatus();
@@ -2739,11 +2817,29 @@ const AI = {
 
   renderStatus() {
     const el = $('aiStatus');
+    const bar = $('aiProg');
+    const meta = $('aiMeta');
     if (!el) return;
-    if (!this.active) { el.textContent = '未启动 —— 先连接设备，再点「启动 AI」'; return; }
+    if (!this.active) {
+      el.textContent = '未启动 —— 先连接设备，再点「启动 AI」';
+      if (bar) bar.style.width = '0%';
+      if (meta) meta.textContent = '';
+      return;
+    }
     const phaseName = { hold: '维持', tease: '挑逗', punch: '冲击', idle: '待机' }[this.phase] || this.phase;
-    const sec = Math.max(0, Math.round((this.phaseEnd - performance.now()) / 1000));
-    el.textContent = `${this.paused ? '⏸ 已暂停 · ' : ''}${phaseName} · 目标区间 ${this.lo}–${this.hi} · 反馈偏移 ${this.bias > 0 ? '+' : ''}${this.bias.toFixed(1)} · 阶段剩余 ${sec}s`;
+    const left = Math.max(0, this.phaseEnd - performance.now());
+    const pct = this.phaseDur > 0 ? clamp(100 * (1 - left / this.phaseDur), 0, 100) : 0;
+    el.textContent = `${this.paused ? '已暂停 · ' : ''}${phaseName} · 目标 ${this.lo}–${this.hi} · 偏移 ${this.bias > 0 ? '+' : ''}${this.bias.toFixed(1)} · 阶段剩余 ${Math.ceil(left / 1000)}s`;
+    if (bar) {
+      bar.style.width = pct.toFixed(0) + '%';
+      bar.style.background = this.phase === 'tease' ? 'linear-gradient(90deg,#ffc24b,#ff9d3f)'
+        : this.phase === 'punch' ? 'linear-gradient(90deg,#ff4d5e,#b3123a)'
+        : 'linear-gradient(90deg,#2fd692,#27d3e6)';
+    }
+    if (meta) {
+      const secs = this.startedAt ? Math.floor((Date.now() - this.startedAt) / 1000) : 0;
+      meta.textContent = `运行 ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')} · 峰值 ${this.peak} · 换波形 ${this.switches} 次`;
+    }
   },
 
   log(text) {
@@ -2766,6 +2862,8 @@ const AI = {
     this.switchAt = 0;
     clearInterval(this.timer);
     this.timer = setInterval(() => this.step(), 1000);
+    this.startedAt = Date.now();
+    this.peak = 0; this.switches = 0; this.highCount = 0; this.smooth = null;
     $('aiLog').innerHTML = '';
     this.log('AI 启动 · 风格：' + ({ soft: '温柔', balanced: '均衡', intense: '激烈' }[this.style]));
     this.renderStatus();
@@ -2807,7 +2905,8 @@ const AI = {
       return d && d.connected ? (ch === 'A' ? d.strengthA : d.strengthB) / 200 : null;
     }).filter(v => v !== null);
     this.wave.push({ a: aVals.length ? Math.max(...aVals) : null, b: bVals.length ? Math.max(...bVals) : null,
-                     ta: aT.length ? Math.max(...aT) : null, tb: bT.length ? Math.max(...bT) : null });
+                     ta: aT.length ? Math.max(...aT) : null, tb: bT.length ? Math.max(...bT) : null,
+                     ph: this.phase });
     if (this.wave.length > 120) this.wave.shift();
     this.drawWave();
   },
@@ -2821,11 +2920,19 @@ const AI = {
     const ctx = cv.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
-    ctx.strokeStyle = 'rgba(255,255,255,.06)';
-    for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(0, h * i / 4); ctx.lineTo(w, h * i / 4); ctx.stroke(); }
     const n = Math.max(2, this.wave.length);
     const xOf = (i) => i / (n - 1) * w;
     const yOf = (v) => h - 4 - clamp(v, 0, 1) * (h - 10);
+    // 阶段色带（维持 / 挑逗 / 冲击）
+    const bandColor = { hold: 'rgba(47,214,146,.09)', tease: 'rgba(255,194,75,.10)', punch: 'rgba(255,77,94,.12)' };
+    this.wave.forEach((s, i) => {
+      if (!s.ph) return;
+      ctx.fillStyle = bandColor[s.ph] || 'transparent';
+      const x = xOf(i);
+      ctx.fillRect(x, 0, w / Math.max(1, n - 1) + 0.5, h);
+    });
+    ctx.strokeStyle = 'rgba(255,255,255,.06)';
+    for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(0, h * i / 4); ctx.lineTo(w, h * i / 4); ctx.stroke(); }
     const line = (key, color) => {
       let started = false, cnt = 0;
       ctx.beginPath();
@@ -2882,9 +2989,19 @@ const AI = {
   },
 
   feedback(type) {
-    if (type === 'low') this.bias = Math.min(4, this.bias + 1);
-    else if (type === 'high') this.bias = Math.max(-4, this.bias - 1.5);
-    else this.bias *= 0.5;
+    if (type === 'low') { this.bias = Math.min(4, this.bias + 1); this.highCount = 0; }
+    else if (type === 'high') {
+      this.bias = Math.max(-4, this.bias - 1.5);
+      this.highCount++;
+      // 连续 3 次「太重」→ 自动把上限区间降 10，避免越调越高
+      if (this.highCount >= 3) {
+        this.highCount = 0;
+        this.hi = Math.max(this.lo + 10, this.hi - 10);
+        this.clampRange();
+        this.log('连续 3 次「太重」：上限区间自动下调至 ' + this.hi);
+        toast('已自动下调目标上限到 ' + this.hi, 'warn');
+      }
+    } else { this.bias *= 0.5; this.highCount = 0; }
     this.log(`反馈：${{ low: '太轻', ok: '正好', high: '太重' }[type]} → 偏移 ${this.bias.toFixed(1)}`);
     this.renderStatus();
     buzz(10);
@@ -3480,7 +3597,7 @@ const GAMES = {
         <div class="game-box">
           <h3><svg class="ic"><use href="#i-grid"/></svg> 记忆翻牌</h3>
           <div class="game-sub">翻出两张一样的牌就算一对；翻错受罚（错得越多越疼）。全部配对成功即胜利！</div>
-          <div class="mem-grid">${deck.map((_, i) => `<div class="mem-card" data-i="${i}">?</div>`).join('')}</div>
+          <div class="mem-grid">${deck.map((_, i) => `<div class="mem-card" data-i="${i}"><div class="mem-inner"><div class="mem-face mem-back">?</div><div class="mem-face mem-front"></div></div></div>`).join('')}</div>
           <div class="game-result" id="mmResult">已配对 0/8</div>
           <div class="game-log" id="mmLog"></div>
           <div class="game-actions"><button class="danger" data-exit>退出游戏</button></div>
@@ -3492,7 +3609,8 @@ const GAMES = {
       const el = document.querySelector(`.mem-card[data-i="${i}"]`);
       if (!el || el.classList.contains('done') || this.flipped.includes(i) || this.flipped.length >= 2) return;
       this.flipped.push(i);
-      el.textContent = this.cards[i];
+      const front = el.querySelector('.mem-front');
+      if (front) front.textContent = this.cards[i];
       el.classList.add('flip');
       if (this.flipped.length === 2) {
         this.moves++;
@@ -3523,8 +3641,10 @@ const GAMES = {
           setTimeout(() => {
             this.flipped.forEach(f => {
               const e = document.querySelector(`.mem-card[data-i="${f}"]`);
-              e.textContent = '?';
+              if (!e) return;
               e.classList.remove('flip');
+              const fr = e.querySelector('.mem-front');
+              if (fr) fr.textContent = '';
             });
             this.flipped = [];
           }, 850);
@@ -3991,6 +4111,210 @@ const GAMES = {
     finish() {
       clearInterval(this.timer);
       const res = $('mathResult');
+      if (this.score >= 6) { res.className = 'game-result win'; res.textContent = `答对 ${this.score}/8，奖励`; Game.reward(); }
+      else { res.className = 'game-result tie'; res.textContent = `答对 ${this.score}/8`; }
+    },
+  },
+
+  /* ---------- 数字记忆 ---------- */
+  digit: {
+    ok: 0, cur: '', phase: 'idle', timer: null,
+    start() {
+      this.ok = 0; Game.streak = 0; this.cur = ''; this.phase = 'idle';
+      $('gameArea').innerHTML = `
+        <div class="game-box">
+          <h3><svg class="ic"><use href="#i-calc"/></svg> 数字记忆</h3>
+          <div class="game-sub">记住闪现的数字，再按顺序输入。位数逐步增加，错一位就受罚。</div>
+          <div class="digit-show" id="dgShow">准备…</div>
+          <div class="guess-row">
+            <input type="text" id="dgInput" inputmode="numeric" autocomplete="off" placeholder="输入数字">
+            <button class="dbtn" id="dgBtn" style="padding:10px 16px;font-weight:800">确定</button>
+          </div>
+          <div class="game-result" id="dgResult"></div>
+          <div class="game-log" id="dgLog"></div>
+          <div class="game-actions"><button class="danger" data-exit>退出游戏</button></div>
+        </div>`;
+      $('dgBtn').onclick = () => this.submit();
+      $('dgInput').onkeydown = (e) => { if (e.key === 'Enter') this.submit(); };
+      $('dgInput').disabled = true;
+      bindExit();
+      this.round();
+    },
+    round() {
+      if (!Game.active) return;
+      const len = 3 + this.ok;
+      this.cur = Array.from({ length: len }, () => Math.floor(Math.random() * 10)).join('');
+      this.phase = 'show';
+      const show = $('dgShow'), inp = $('dgInput');
+      if (!show || !inp) return;
+      show.textContent = this.cur;
+      show.classList.add('on');
+      inp.value = ''; inp.disabled = true;
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        if (!Game.active) return;
+        show.textContent = '请输入';
+        show.classList.remove('on');
+        inp.disabled = false;
+        if (inp.focus) inp.focus();
+        this.phase = 'input';
+      }, 800 + this.cur.length * 170);
+    },
+    submit() {
+      if (this.phase !== 'input') return;
+      const v = ($('dgInput').value || '').replace(/\D/g, '');
+      if (!v) return;
+      const res = $('dgResult');
+      if (v === this.cur) {
+        this.ok++;
+        Game.streak = 0;
+        res.className = 'game-result win';
+        res.textContent = '✓ 正确，加一位';
+        Game.log($('dgLog'), `第 ${this.ok} 关通过（${this.cur.length} 位）`);
+        setTimeout(() => { if (Game.active) this.round(); }, 500);
+      } else {
+        Game.streak++;
+        Game.shock({ mult: 0.75 + Game.streak * 0.15, ms: 400 });
+        res.className = 'game-result lose';
+        res.textContent = `✗ 错了，正确答案 ${this.cur}`;
+        Game.log($('dgLog'), `第 ${this.ok + 1} 关错（${this.cur.length} 位）`);
+        setTimeout(() => { if (Game.active) this.round(); }, 1100);
+      }
+    },
+  },
+
+  /* ---------- 节奏敲击 ---------- */
+  rhythm: {
+    bpm: 96, beats: 16, idx: 0, beatAt: 0, devs: [], timer: null, started: false,
+    start() {
+      this.idx = 0; this.devs = []; this.started = false;
+      Game.streak = 0;
+      $('gameArea').innerHTML = `
+        <div class="game-box">
+          <h3><svg class="ic"><use href="#i-metronome"/></svg> 节奏敲击</h3>
+          <div class="game-sub">跟着节拍点「敲」，每拍一下。平均偏差越大罚得越狠；偏差小有奖励。</div>
+          <div class="beat-bar"><div class="beat-fill" id="beatFill"></div></div>
+          <div class="whack-hud"><span>拍数 <b id="rhBeat">0</b>/${this.beats}</span><span>平均偏差 <b id="rhDev">--</b> ms</span></div>
+          <button class="connect-btn" id="rhTap" style="width:100%">敲一下</button>
+          <div class="game-result" id="rhResult">点「敲一下」开始</div>
+          <div class="game-log" id="rhLog"></div>
+          <div class="game-actions"><button class="danger" data-exit>退出游戏</button></div>
+        </div>`;
+      $('rhTap').onclick = () => this.tap();
+      bindExit();
+    },
+    interval() { return 60000 / this.bpm; },
+    begin() {
+      this.started = true;
+      this.idx = 0;
+      this.beatAt = performance.now() + this.interval();
+      clearInterval(this.timer);
+      this.timer = setInterval(() => {
+        if (!Game.active || !this.started) return;
+        this.idx++;
+        const fill = $('beatFill');
+        if (fill) { fill.classList.add('hit'); setTimeout(() => fill.classList.remove('hit'), 90); }
+        if (this.idx > this.beats) this.finish();
+      }, this.interval());
+    },
+    tap() {
+      const btn = $('rhTap');
+      if (!this.started) { this.begin(); btn.textContent = '敲！'; $('rhResult').textContent = '跟着节拍'; return; }
+      if (!Game.active) return;
+      const now = performance.now();
+      const iv = this.interval();
+      let d = Math.abs(now - this.beatAt) % iv;
+      if (d > iv / 2) d = iv - d;
+      this.devs.push(d);
+      const avg = Math.round(this.devs.reduce((a, b) => a + b, 0) / this.devs.length);
+      const dev = $('rhDev'); if (dev) dev.textContent = avg;
+      const beat = $('rhBeat'); if (beat) beat.textContent = this.devs.length;
+      btn.style.transform = 'scale(.95)';
+      setTimeout(() => { btn.style.transform = ''; }, 70);
+    },
+    finish() {
+      clearInterval(this.timer); this.started = false;
+      const avg = this.devs.length ? Math.round(this.devs.reduce((a, b) => a + b, 0) / this.devs.length) : 999;
+      const res = $('rhResult');
+      if (avg <= 90) { res.className = 'game-result win'; res.textContent = `平均偏差 ${avg}ms，节奏大师！`; Game.reward(); }
+      else if (avg <= 180) { Game.tickle(); res.className = 'game-result tie'; res.textContent = `平均偏差 ${avg}ms，还行`; }
+      else { Game.streak++; Game.shock({ mult: 0.7 + Math.min(2, avg / 300), ms: 450 }); res.className = 'game-result lose'; res.textContent = `平均偏差 ${avg}ms，太飘了`; }
+      Game.log($('rhLog'), `16 拍 平均偏差 ${avg}ms`);
+      const btn = $('rhTap'); if (btn) { btn.textContent = '再来一轮'; btn.onclick = () => { if (!Game.active) return; $('rhResult').textContent = ''; this.devs = []; this.idx = 0; $('rhBeat').textContent = '0'; this.begin(); }; }
+    },
+  },
+
+  /* ---------- 颜色判断（斯特鲁普） ---------- */
+  stroop: {
+    COLORS: [['红', '#ff4d5e'], ['绿', '#2fd692'], ['蓝', '#4d7bff'], ['黄', '#ffc24b']],
+    rounds: 8, r: 0, score: 0, answer: '', lock: true, timer: null, left: 0,
+    start() {
+      this.r = 0; this.score = 0; this.lock = true;
+      Game.streak = 0;
+      $('gameArea').innerHTML = `
+        <div class="game-box">
+          <h3><svg class="ic"><use href="#i-target"/></svg> 颜色判断</h3>
+          <div class="game-sub">看字显示的颜色（不是字写的什么），4 秒内选对。选错/超时受罚，共 8 题。</div>
+          <div class="stroop-word" id="stWord">—</div>
+          <div class="whack-hud"><span>第 <b id="stNo">1</b>/8 题</span><span id="stTimer">4.0s</span></div>
+          <div class="stroop-btns" id="stBtns">
+            ${this.COLORS.map(([name], i) => `<button data-c="${i}">${name}</button>`).join('')}
+          </div>
+          <div class="game-result" id="stResult"></div>
+          <div class="game-log" id="stLog"></div>
+          <div class="game-actions"><button class="danger" data-exit>退出游戏</button></div>
+        </div>`;
+      document.querySelectorAll('#stBtns [data-c]').forEach(b => b.onclick = () => this.pick(+b.dataset.c));
+      bindExit();
+      this.next();
+    },
+    next() {
+      if (!Game.active) return;
+      if (this.r >= this.rounds) { this.finish(); return; }
+      this.r++;
+      const no = $('stNo'); if (no) no.textContent = this.r;
+      const wordIdx = Math.floor(Math.random() * 4);
+      let inkIdx = Math.floor(Math.random() * 4);
+      if (Math.random() < 0.7) { while (inkIdx === wordIdx) inkIdx = Math.floor(Math.random() * 4); }
+      this.answer = this.COLORS[inkIdx][0];
+      const w = $('stWord');
+      if (w) { w.textContent = this.COLORS[wordIdx][0]; w.style.color = this.COLORS[inkIdx][1]; w.style.textShadow = '0 0 26px ' + this.COLORS[inkIdx][1] + '66'; }
+      this.lock = false;
+      this.left = 4000;
+      const el = $('stTimer');
+      clearInterval(this.timer);
+      this.timer = setInterval(() => {
+        this.left -= 100;
+        if (el) el.textContent = (Math.max(0, this.left) / 1000).toFixed(1) + 's';
+        if (this.left <= 0) { clearInterval(this.timer); this.fail('超时'); }
+      }, 100);
+    },
+    pick(i) {
+      if (this.lock) return;
+      const name = this.COLORS[i][0];
+      if (name === this.answer) {
+        clearInterval(this.timer);
+        this.lock = true; this.score++;
+        Game.streak = 0;
+        $('stResult').className = 'game-result win';
+        $('stResult').textContent = '✓ 正确';
+        Game.log($('stLog'), `第 ${this.r} 题 正确（${name}）`);
+        setTimeout(() => { if (Game.active) this.next(); }, 420);
+      } else this.fail('选错');
+    },
+    fail(why) {
+      clearInterval(this.timer);
+      this.lock = true;
+      Game.streak++;
+      Game.shock({ mult: 0.7 + Game.streak * 0.15, ms: 380 });
+      $('stResult').className = 'game-result lose';
+      $('stResult').textContent = `✗ ${why}，正确是「${this.answer}」`;
+      Game.log($('stLog'), `第 ${this.r} 题 ${why}`);
+      setTimeout(() => { if (Game.active) this.next(); }, 900);
+    },
+    finish() {
+      clearInterval(this.timer);
+      const res = $('stResult');
       if (this.score >= 6) { res.className = 'game-result win'; res.textContent = `答对 ${this.score}/8，奖励`; Game.reward(); }
       else { res.className = 'game-result tie'; res.textContent = `答对 ${this.score}/8`; }
     },
